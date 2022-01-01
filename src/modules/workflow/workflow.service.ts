@@ -9,12 +9,15 @@ import { CreateWorkflowDto } from './dto/create-workflow.dto';
 import type { UpdateWorkflowDto } from './dto/update-workflow.dto';
 import type { WorkflowDto } from './dto/workflow.dto';
 import { WorkflowEntity } from './entities/workflow.entity';
+import { WorkflowItemEntity } from './entities/workflow-item.entity';
 
 @Injectable()
 export class WorkflowService {
   constructor(
     @InjectRepository(WorkflowEntity)
     private workflowRepository: Repository<WorkflowEntity>,
+    @InjectRepository(WorkflowItemEntity)
+    private workflowItemRepository: Repository<WorkflowItemEntity>,
   ) {}
 
   @Transactional()
