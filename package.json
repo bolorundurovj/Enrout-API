@@ -1,6 +1,6 @@
 {
   "name": "enrout",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Awesome NestJS Boilerplate, Typescript, Postgres, TypeORM",
   "author": "Bolorunduro Valiant-Joshua <bolorundurovb@gmail.com>",
   "private": true,
