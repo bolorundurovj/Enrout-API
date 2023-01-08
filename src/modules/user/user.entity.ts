@@ -27,6 +27,8 @@ export interface IUserEntity extends IAbstractEntity<UserDto> {
 
   fullName?: string;
 
+  universityId: string;
+
   settings?: IUserSettingsEntity;
 }
 
@@ -56,6 +58,9 @@ export class UserEntity
 
   @Column({ nullable: true })
   avatar?: string;
+
+  @Column({ unique: true, nullable: false })
+  universityId: string;
 
   @VirtualColumn()
   fullName?: string;
