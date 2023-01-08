@@ -38,20 +38,20 @@ export class UserEntity
   extends AbstractEntity<UserDto, UserDtoOptions>
   implements IUserEntity
 {
-  @Column({ nullable: true })
-  firstName?: string;
+  @Column({ nullable: false })
+  firstName: string;
 
-  @Column({ nullable: true })
-  lastName?: string;
+  @Column({ nullable: false })
+  lastName: string;
 
   @Column({ type: 'enum', enum: RoleType, default: RoleType.USER })
   role: RoleType;
 
-  @Column({ unique: true, nullable: true })
-  email?: string;
+  @Column({ unique: true, nullable: false })
+  email: string;
 
-  @Column({ nullable: true })
-  password?: string;
+  @Column({ nullable: false })
+  password: string;
 
   @Column({ nullable: true })
   phone?: string;
