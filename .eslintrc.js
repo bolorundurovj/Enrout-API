@@ -5,7 +5,7 @@ module.exports = {
     es6: true,
     node: true,
   },
-  ignorePatterns: ['.eslintrc.js'],
+  ignorePatterns: ['.eslintrc.js', '*.validator.js', '*.validator.ts'],
   parserOptions: {
     ecmaVersion: 2020,
     project: './tsconfig.eslint.json',
