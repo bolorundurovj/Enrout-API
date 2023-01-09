@@ -31,6 +31,12 @@ export class UserRegisterDto {
   @Trim()
   readonly email: string;
 
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  @Trim()
+  readonly universityId: string;
+
   @ApiProperty({ minLength: 6 })
   @IsString()
   @MinLength(6)
