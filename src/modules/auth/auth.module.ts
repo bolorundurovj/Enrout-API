@@ -2,6 +2,7 @@ import { forwardRef, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 
+import { MailModule } from '../../mail/mail.module';
 import { ApiConfigService } from '../../shared/services/api-config.service';
 import { UserModule } from '../user/user.module';
 import { AuthController } from './auth.controller';
@@ -31,6 +32,7 @@ import { PublicStrategy } from './public.strategy';
       }),
       inject: [ApiConfigService],
     }),
+    MailModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, PublicStrategy],
