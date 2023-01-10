@@ -17,9 +17,9 @@ export interface IUserEntity extends IAbstractEntity<UserDto> {
 
   role: RoleType;
 
-  email?: string;
+  email: string;
 
-  password?: string;
+  password: string;
 
   phone?: string;
 
@@ -28,6 +28,8 @@ export interface IUserEntity extends IAbstractEntity<UserDto> {
   fullName?: string;
 
   universityId: string;
+
+  token?: string;
 
   settings?: IUserSettingsEntity;
 }
@@ -61,6 +63,9 @@ export class UserEntity
 
   @Column({ unique: true, nullable: false })
   universityId: string;
+
+  @Column({ nullable: true })
+  token?: string;
 
   @VirtualColumn()
   fullName?: string;
