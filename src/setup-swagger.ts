@@ -3,7 +3,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 export function setupSwagger(app: INestApplication): void {
   const documentBuilder = new DocumentBuilder()
-    .setTitle('API')
+    .setTitle('Enrout API')
     .setDescription(
       `### REST
 
