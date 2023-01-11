@@ -17,6 +17,7 @@ import { UserDto } from '../user/dtos/user.dto';
 import { UserEntity } from '../user/user.entity';
 import { UserService } from '../user/user.service';
 import { AuthService } from './auth.service';
+import { ForgotPasswordDto } from './dto/ForgotPasswordDto';
 import { LoginPayloadDto } from './dto/LoginPayloadDto';
 import { UserLoginDto } from './dto/UserLoginDto';
 import { UserRegisterDto } from './dto/UserRegisterDto';
@@ -64,6 +65,22 @@ export class AuthController {
     return createdUser.toDto({
       isActive: true,
     });
+  }
+
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    type: ForgotPasswordDto,
+    description: 'User info with access token',
+  })
+  async forgotUserPassword(
+    @Body() forgotPasswordDto: ForgotPasswordDto,
+  ): Promise<{ message: string }> {
+    await this.authService.forgotPassword(forgotPasswordDto.email);
+
+    return {
+      message: 'Reset Success',
+    };
   }
 
   @Version('1')

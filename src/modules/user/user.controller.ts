@@ -27,7 +27,7 @@ export class UserController {
   ) {}
 
   @Get('admin')
-  @Auth([RoleType.USER])
+  @Auth([RoleType.ADMIN])
   @HttpCode(HttpStatus.OK)
   @UseLanguageInterceptor()
   async admin(@AuthUser() user: UserEntity) {

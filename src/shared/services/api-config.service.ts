@@ -136,6 +136,7 @@ export class ApiConfigService {
       privateKey: this.getString('JWT_PRIVATE_KEY'),
       publicKey: this.getString('JWT_PUBLIC_KEY'),
       jwtExpirationTime: this.getNumber('JWT_EXPIRATION_TIME'),
+      secondaryJwtExpirationTime: this.getNumber('SEC_JWT_EXPIRATION_TIME'),
     };
   }
 

@@ -117,4 +117,18 @@ export class UserService {
       new CreateSettingsCommand(userId, createSettingsDto),
     );
   }
+
+  async saveToken(
+    user: UserEntity,
+    hash: string,
+    tokenExpiry: Date,
+  ): Promise<UserDto> {
+    user.token = hash;
+    const userEntity = await this.userRepository.update(
+      { id: user.id },
+      { token: hash, tokenExpiry },
+    );
+
+    return userEntity.raw;
+  }
 }

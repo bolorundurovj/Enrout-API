@@ -8,20 +8,17 @@ import type { UserEntity } from '../user.entity';
 export type UserDtoOptions = Partial<{ isActive: boolean }>;
 
 export class UserDto extends AbstractDto {
-  @ApiPropertyOptional()
-  firstName?: string;
-
-  @ApiPropertyOptional()
-  lastName?: string;
+  @ApiProperty()
+  firstName: string;
 
   @ApiProperty()
-  username: string;
+  lastName: string;
 
-  @ApiPropertyOptional({ enum: RoleType })
+  @ApiProperty({ enum: RoleType })
   role: RoleType;
 
-  @ApiPropertyOptional()
-  email?: string;
+  @ApiProperty()
+  email: string;
 
   @ApiPropertyOptional()
   avatar?: string;

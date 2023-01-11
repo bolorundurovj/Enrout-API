@@ -3,9 +3,14 @@ import './boilerplate.polyfill';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { MailerModule } from '@nestjs-modules/mailer';
 import { I18nModule } from 'nestjs-i18n';
 import path from 'path';
 
+import appConfig from './config/app.config';
+import mailConfig from './config/mail.config';
+import { MailModule } from './mail/mail.module';
+import { MailConfigService } from './mail/mail-config.service';
 import { AuthModule } from './modules/auth/auth.module';
 import { HealthCheckerModule } from './modules/health-checker/health-checker.module';
 import { PostModule } from './modules/post/post.module';
@@ -21,6 +26,7 @@ import { SharedModule } from './shared/shared.module';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+      load: [appConfig, mailConfig],
     }),
     TypeOrmModule.forRootAsync({
       imports: [SharedModule],
@@ -39,7 +45,11 @@ import { SharedModule } from './shared/shared.module';
       imports: [SharedModule],
       inject: [ApiConfigService],
     }),
+    MailerModule.forRootAsync({
+      useClass: MailConfigService,
+    }),
     HealthCheckerModule,
+    MailModule,
   ],
   providers: [],
 })
