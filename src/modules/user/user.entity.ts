@@ -31,6 +31,8 @@ export interface IUserEntity extends IAbstractEntity<UserDto> {
 
   token?: string;
 
+  tokenExpiry?: Date;
+
   settings?: IUserSettingsEntity;
 }
 
@@ -66,6 +68,9 @@ export class UserEntity
 
   @Column({ nullable: true })
   token?: string;
+
+  @Column({ nullable: true })
+  tokenExpiry?: Date;
 
   @VirtualColumn()
   fullName?: string;

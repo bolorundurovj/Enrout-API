@@ -118,11 +118,15 @@ export class UserService {
     );
   }
 
-  async saveToken(user: UserEntity, hash: string): Promise<UserDto> {
+  async saveToken(
+    user: UserEntity,
+    hash: string,
+    tokenExpiry: Date,
+  ): Promise<UserDto> {
     user.token = hash;
     const userEntity = await this.userRepository.update(
       { id: user.id },
-      { token: hash },
+      { token: hash, tokenExpiry },
     );
 
     return userEntity.raw;

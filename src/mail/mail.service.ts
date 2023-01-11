@@ -14,7 +14,7 @@ export class MailService {
     private configService: ConfigService,
   ) {}
 
-  async forgotPassword(mailData: IMailData<{ hash: string }>) {
+  async forgotPassword(mailData: IMailData<{ hash: string; expires: number }>) {
     await this.mailerService.sendMail({
       to: mailData.to,
       subject: 'Reset Password',
@@ -29,7 +29,7 @@ export class MailService {
         }`,
         actionTitle: 'Password reset request',
         app_name: this.configService.get('app.name'),
-        text1: 'reset-password.text1',
+        text1: `Expires in ${mailData.data.expires} minutes.`,
         text2: 'reset-password.text2',
         text3: 'reset-password.text3',
         text4: 'reset-password.text4',
