@@ -131,4 +131,13 @@ export class UserService {
 
     return userEntity.raw;
   }
+
+  async savePassword(user: UserEntity, password: string): Promise<UserDto> {
+    const userEntity = await this.userRepository.update(
+      { id: user.id },
+      { token: null!, tokenExpiry: null!, password },
+    );
+
+    return userEntity.raw;
+  }
 }

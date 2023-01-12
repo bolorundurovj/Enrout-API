@@ -19,6 +19,7 @@ import { UserService } from '../user/user.service';
 import { AuthService } from './auth.service';
 import { ForgotPasswordDto } from './dto/ForgotPasswordDto';
 import { LoginPayloadDto } from './dto/LoginPayloadDto';
+import { ResetPasswordDto } from './dto/ResetPasswordDto';
 import { UserLoginDto } from './dto/UserLoginDto';
 import { UserRegisterDto } from './dto/UserRegisterDto';
 
@@ -77,6 +78,25 @@ export class AuthController {
     @Body() forgotPasswordDto: ForgotPasswordDto,
   ): Promise<{ message: string }> {
     await this.authService.forgotPassword(forgotPasswordDto.email);
+
+    return {
+      message: 'Reset Success',
+    };
+  }
+
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    type: ResetPasswordDto,
+    description: 'User info with access token',
+  })
+  async resetUserPassword(
+    @Body() resetPasswordDto: ResetPasswordDto,
+  ): Promise<{ message: string }> {
+    await this.authService.resetPassword(
+      resetPasswordDto.token,
+      resetPasswordDto.password,
+    );
 
     return {
       message: 'Reset Success',

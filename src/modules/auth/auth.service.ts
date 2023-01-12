@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import { validateHash } from '../../common/utils';
@@ -50,6 +50,28 @@ export class AuthService {
     }
 
     return user!;
+  }
+
+  async resetPassword(token: string, password: string) {
+    try {
+      if (this.jwtService.verify(token)) {
+        const decodedToken = this.jwtService.decode(token)!;
+        const { userId } = decodedToken;
+        const user = await this.userService.findOne({
+          id: userId,
+        });
+
+        if (!user) {
+          return new UserNotFoundException();
+        }
+
+        await this.userService.savePassword(user, password);
+      }
+    } catch (error) {
+      console.error(error);
+
+      throw new BadRequestException();
+    }
   }
 
   async forgotPassword(email: string): Promise<void> {
