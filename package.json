@@ -5,6 +5,9 @@
   "author": "Bolorunduro Valiant-Joshua <bolorundurovb@gmail.com>",
   "private": true,
   "license": "MIT",
+  "engines" : {
+    "node" : ">=16.0.0 <17.0.0"
+  },
   "scripts": {
     "build:prod": "tsc -p tsconfig.build.json",
     "postbuild:prod": "copyfiles --up 1 src/**/*.json dist",
