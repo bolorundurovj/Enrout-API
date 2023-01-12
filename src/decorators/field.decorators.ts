@@ -82,11 +82,11 @@ export function NumberField(
     decorators.push(IsNumber({}, { each }));
   }
 
-  if (_.isNumber(minimum)) {
+  if (_.isNumber(minimum!)) {
     decorators.push(Min(minimum, { each }));
   }
 
-  if (_.isNumber(maximum)) {
+  if (_.isNumber(maximum!)) {
     decorators.push(Max(maximum, { each }));
   }
 
