@@ -56,7 +56,7 @@ export class AuthService {
     try {
       if (this.jwtService.verify(token)) {
         const decodedToken = this.jwtService.decode(token)!;
-        const { userId } = decodedToken;
+        const { userId } = <{ userId: Uuid }>decodedToken;
         const user = await this.userService.findOne({
           id: userId,
         });
