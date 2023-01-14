@@ -1,12 +1,12 @@
 {
   "name": "enrout",
-  "version": "0.1.0-0",
+  "version": "0.1.0-1",
   "description": "Awesome NestJS Boilerplate, Typescript, Postgres, TypeORM",
   "author": "Bolorunduro Valiant-Joshua <bolorundurovb@gmail.com>",
   "private": true,
   "license": "MIT",
-  "engines" : {
-    "node" : ">=16.0.0 <17.0.0"
+  "engines": {
+    "node": ">=16.0.0 <17.0.0"
   },
   "scripts": {
     "build:prod": "tsc -p tsconfig.build.json",
