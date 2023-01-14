@@ -60,7 +60,7 @@ export class StudentEntity
   @Column({ nullable: false })
   password: string;
 
-  @Column({ nullable: false })
+  @Column({ unique: true, nullable: false })
   matricNo: string;
 
   @Column({ nullable: true })
@@ -68,9 +68,6 @@ export class StudentEntity
 
   @Column({ nullable: true })
   avatar?: string;
-
-  @Column({ unique: true, nullable: false })
-  universityId: string;
 
   @Column({ nullable: true })
   token?: string;
