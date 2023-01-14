@@ -7,12 +7,14 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 
 import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
 import { GroupService } from './group.service';
 
-@Controller('group')
+@Controller('groups')
+@ApiTags('Groups')
 export class GroupController {
   constructor(private readonly groupService: GroupService) {}
 

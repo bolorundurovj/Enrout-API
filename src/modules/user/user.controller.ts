@@ -19,7 +19,7 @@ import { UserEntity } from './user.entity';
 import { UserService } from './user.service';
 
 @Controller('users')
-@ApiTags('users')
+@ApiTags('Users')
 export class UserController {
   constructor(
     private userService: UserService,

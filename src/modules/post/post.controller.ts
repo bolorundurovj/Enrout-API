@@ -28,7 +28,7 @@ import { UpdatePostDto } from './dtos/update-post.dto';
 import { PostService } from './post.service';
 
 @Controller('posts')
-@ApiTags('posts')
+@ApiTags('Posts')
 export class PostController {
   constructor(private postService: PostService) {}
 
