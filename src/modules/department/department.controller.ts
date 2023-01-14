@@ -19,8 +19,10 @@ export class DepartmentController {
   constructor(private readonly departmentService: DepartmentService) {}
 
   @Post()
-  create(@Body() createDepartmentDto: CreateDepartmentDto) {
-    return this.departmentService.create(createDepartmentDto);
+  async create(@Body() createDepartmentDto: CreateDepartmentDto) {
+    const deptEntity = await this.departmentService.create(createDepartmentDto);
+
+    return deptEntity.toDto();
   }
 
   @Get()

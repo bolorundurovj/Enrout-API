@@ -1,12 +1,27 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Transactional } from 'typeorm-transactional-cls-hooked';
 
-import type { CreateDepartmentDto } from './dto/create-department.dto';
+import { CreateDepartmentDto } from './dto/create-department.dto';
 import type { UpdateDepartmentDto } from './dto/update-department.dto';
+import { DepartmentEntity } from './entities/department.entity';
 
 @Injectable()
 export class DepartmentService {
-  create(createDepartmentDto: CreateDepartmentDto) {
-    return createDepartmentDto;
+  constructor(
+    @InjectRepository(DepartmentEntity)
+    private deptRepository: Repository<DepartmentEntity>,
+  ) {}
+
+  @Transactional()
+  async create(
+    createDepartmentDto: CreateDepartmentDto,
+  ): Promise<DepartmentEntity> {
+    const dept = this.deptRepository.create(createDepartmentDto);
+    await this.deptRepository.save(dept);
+
+    return dept;
   }
 
   findAll() {
