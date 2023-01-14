@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Transactional } from 'typeorm-transactional-cls-hooked';
@@ -36,8 +36,18 @@ export class DepartmentService {
     return items.toPageDto(pageMetaDto);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} department`;
+  async findOne(id: Uuid): Promise<DepartmentEntity> {
+    const queryBuilder = this.deptRepository
+      .createQueryBuilder('dept')
+      .where('dept.id = :id', { id });
+
+    const deptEntity = await queryBuilder.getOne();
+
+    if (!deptEntity) {
+      throw new NotFoundException();
+    }
+
+    return deptEntity;
   }
 
   update(id: number, updateDepartmentDto: UpdateDepartmentDto) {

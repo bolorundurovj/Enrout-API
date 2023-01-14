@@ -12,6 +12,7 @@ import { ApiTags } from '@nestjs/swagger';
 
 import type { PageDto } from '../../common/dto/page.dto';
 import { PageOptionsDto } from '../../common/dto/page-options.dto';
+import { UUIDParam } from '../../decorators';
 import { DepartmentService } from './department.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import type { DepartmentDto } from './dto/department.dto';
@@ -37,8 +38,10 @@ export class DepartmentController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.departmentService.findOne(Number(id));
+  async findOne(@UUIDParam('id') id: Uuid): Promise<DepartmentDto> {
+    const deptEntity = await this.departmentService.findOne(id);
+
+    return deptEntity.toDto();
   }
 
   @Patch(':id')
