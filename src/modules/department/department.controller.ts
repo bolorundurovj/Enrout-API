@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  Param,
   Patch,
   Post,
   Query,
@@ -58,7 +57,9 @@ export class DepartmentController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.departmentService.remove(Number(id));
+  async remove(@UUIDParam('id') id: Uuid): Promise<DepartmentDto> {
+    const deptEntity = await this.departmentService.remove(id);
+
+    return deptEntity.toDto();
   }
 }

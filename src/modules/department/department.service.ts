@@ -69,7 +69,19 @@ export class DepartmentService {
     return deptEntity;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} department`;
+  async remove(id: Uuid) {
+    const queryBuilder = this.deptRepository
+      .createQueryBuilder('dept')
+      .where('dept.id = :id', { id });
+
+    const deptEntity = await queryBuilder.getOne();
+
+    if (!deptEntity) {
+      throw new NotFoundException();
+    }
+
+    await this.deptRepository.remove(deptEntity);
+
+    return deptEntity;
   }
 }
