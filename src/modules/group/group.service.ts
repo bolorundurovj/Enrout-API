@@ -1,10 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import { CommandBus } from '@nestjs/cqrs';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Transactional } from 'typeorm-transactional-cls-hooked';
 
-import { ValidatorService } from '../../shared/services/validator.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import type { UpdateGroupDto } from './dto/update-group.dto';
 import { GroupEntity } from './entities/group.entity';
@@ -14,8 +12,6 @@ export class GroupService {
   constructor(
     @InjectRepository(GroupEntity)
     private groupRepository: Repository<GroupEntity>,
-    private validatorService: ValidatorService,
-    private commandBus: CommandBus,
   ) {}
 
   @Transactional()
@@ -30,8 +26,18 @@ export class GroupService {
     return `This action returns all group`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} group`;
+  async findOne(id: Uuid): Promise<GroupEntity> {
+    const queryBuilder = this.groupRepository
+      .createQueryBuilder('group')
+      .where('group.id = :id', { id });
+
+    const groupEntity = await queryBuilder.getOne();
+
+    if (!groupEntity) {
+      throw new NotFoundException();
+    }
+
+    return groupEntity;
   }
 
   update(id: number, updateGroupDto: UpdateGroupDto) {

@@ -9,7 +9,9 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
+import { UUIDParam } from '../../decorators';
 import { CreateGroupDto } from './dto/create-group.dto';
+import type { GroupDto } from './dto/group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
 import { GroupService } from './group.service';
 
@@ -31,8 +33,10 @@ export class GroupController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.groupService.findOne(Number(id));
+  async findOne(@UUIDParam('id') id: Uuid): Promise<GroupDto> {
+    const groupEntity = await this.groupService.findOne(id);
+
+    return groupEntity.toDto();
   }
 
   @Patch(':id')
