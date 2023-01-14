@@ -1,17 +1,17 @@
 import {registerDecorator, ValidationOptions} from 'class-validator';
 
 
-export function IsValidEmail(validationOptions?: ValidationOptions) {
+export function IsValidStaffEmail(validationOptions?: ValidationOptions) {
   return function (object: object, propertyName: string) {
     registerDecorator({
-      name: 'isValidEmail',
+      name: 'isValidStaffEmail',
       target: object.constructor,
       propertyName: propertyName,
       constraints: [],
       options: validationOptions,
       validator: {
         validate(value: string) {
-          const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+          const emailRegex = /^[a-zA-Z]+@futa\.edu\.ng$/;
           return emailRegex.test(value);
         },
       },
