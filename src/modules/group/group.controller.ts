@@ -6,9 +6,12 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
+import type { PageDto } from '../../common/dto/page.dto';
+import { PageOptionsDto } from '../../common/dto/page-options.dto';
 import { UUIDParam } from '../../decorators';
 import { CreateGroupDto } from './dto/create-group.dto';
 import type { GroupDto } from './dto/group.dto';
@@ -28,8 +31,10 @@ export class GroupController {
   }
 
   @Get()
-  findAll() {
-    return this.groupService.findAll();
+  async findAll(
+    @Query() pageOptionsDto: PageOptionsDto,
+  ): Promise<PageDto<GroupDto>> {
+    return this.groupService.findAll(pageOptionsDto);
   }
 
   @Get(':id')

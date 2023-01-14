@@ -3,7 +3,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Transactional } from 'typeorm-transactional-cls-hooked';
 
+import type { PageDto } from '../../common/dto/page.dto';
+import type { PageOptionsDto } from '../../common/dto/page-options.dto';
 import { CreateGroupDto } from './dto/create-group.dto';
+import type { GroupDto } from './dto/group.dto';
 import type { UpdateGroupDto } from './dto/update-group.dto';
 import { GroupEntity } from './entities/group.entity';
 
@@ -22,8 +25,11 @@ export class GroupService {
     return group;
   }
 
-  findAll() {
-    return `This action returns all group`;
+  async findAll(pageOptionsDto: PageOptionsDto): Promise<PageDto<GroupDto>> {
+    const queryBuilder = this.groupRepository.createQueryBuilder('group');
+    const [items, pageMetaDto] = await queryBuilder.paginate(pageOptionsDto);
+
+    return items.toPageDto(pageMetaDto);
   }
 
   async findOne(id: Uuid): Promise<GroupEntity> {
