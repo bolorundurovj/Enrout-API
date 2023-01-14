@@ -45,11 +45,16 @@ export class DepartmentController {
   }
 
   @Patch(':id')
-  update(
-    @Param('id') id: string,
+  async update(
+    @UUIDParam('id') id: Uuid,
     @Body() updateDepartmentDto: UpdateDepartmentDto,
-  ) {
-    return this.departmentService.update(Number(id), updateDepartmentDto);
+  ): Promise<DepartmentDto> {
+    const deptEntity = await this.departmentService.update(
+      id,
+      updateDepartmentDto,
+    );
+
+    return deptEntity.toDto();
   }
 
   @Delete(':id')

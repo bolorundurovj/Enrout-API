@@ -50,11 +50,23 @@ export class DepartmentService {
     return deptEntity;
   }
 
-  update(id: number, updateDepartmentDto: UpdateDepartmentDto) {
-    return {
-      id,
-      department: updateDepartmentDto,
-    };
+  async update(
+    id: Uuid,
+    updateDepartmentDto: UpdateDepartmentDto,
+  ): Promise<DepartmentEntity> {
+    const queryBuilder = this.deptRepository
+      .createQueryBuilder('dept')
+      .where('dept.id = :id', { id });
+
+    const deptEntity = await queryBuilder.getOne();
+
+    if (!deptEntity) {
+      throw new NotFoundException();
+    }
+
+    await this.deptRepository.update({ id }, updateDepartmentDto);
+
+    return deptEntity;
   }
 
   remove(id: number) {
