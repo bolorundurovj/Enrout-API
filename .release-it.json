@@ -1,7 +1,7 @@
 {
   "git": {
-    "commitMessage": "chore(): release v${version}",
-    "changelog": "npx auto-changelog --stdout --commit-limit false -u --template https://raw.githubusercontent.com/release-it/release-it/master/templates/changelog-compact.hbs"
+    "commitMessage": "release(): release v${version}",
+    "changelog": "npx auto-changelog --stdout --commit-limit false -u --template https://raw.githubusercontent.com/release-it/release-it/master/templates/keepachangelog.hbs"
   },
   "github": {
     "release": true
