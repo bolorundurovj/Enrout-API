@@ -1,9 +1,10 @@
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 
 import type { IAbstractEntity } from '../../../common/abstract.entity';
 import { AbstractEntity } from '../../../common/abstract.entity';
 import { DivisionType } from '../../../constants';
 import { UseDto } from '../../../decorators';
+import { DepartmentEntity } from '../../department/entities/department.entity';
 import type { GroupDtoOptions } from '../dto/group.dto';
 import { GroupDto } from '../dto/group.dto';
 
@@ -29,4 +30,7 @@ export class GroupEntity
     nullable: false,
   })
   division: DivisionType;
+
+  @OneToMany(() => DepartmentEntity, (deptEntity) => deptEntity.group)
+  departments: DepartmentEntity[];
 }
