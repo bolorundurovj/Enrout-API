@@ -7,12 +7,14 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 
 import { CreateWorkflowDto } from './dto/create-workflow.dto';
 import { UpdateWorkflowDto } from './dto/update-workflow.dto';
 import { WorkflowService } from './workflow.service';
 
-@Controller('workflow')
+@Controller('workflows')
+@ApiTags('Workflows')
 export class WorkflowController {
   constructor(private readonly workflowService: WorkflowService) {}
 
