@@ -1,9 +1,16 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
+import type { IAbstractEntity } from '../../../common/abstract.entity';
 import { AbstractEntity } from '../../../common/abstract.entity';
 import { UseDto } from '../../../decorators';
+import type { IGroupEntity } from '../../group/entities/group.entity';
 import { GroupEntity } from '../../group/entities/group.entity';
 import { DepartmentDto } from '../dto/department.dto';
+
+export interface IDepartmentEntity extends IAbstractEntity<DepartmentDto> {
+  name: string;
+  group: IGroupEntity;
+}
 
 @Entity({ name: 'departments' })
 @UseDto(DepartmentDto)
