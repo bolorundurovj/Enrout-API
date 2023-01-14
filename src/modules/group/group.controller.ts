@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  Param,
   Patch,
   Post,
   Query,
@@ -45,12 +44,19 @@ export class GroupController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateGroupDto: UpdateGroupDto) {
-    return this.groupService.update(Number(id), updateGroupDto);
+  async update(
+    @UUIDParam('id') id: Uuid,
+    @Body() updateGroupDto: UpdateGroupDto,
+  ) {
+    const groupEntity = await this.groupService.update(id, updateGroupDto);
+
+    return groupEntity.toDto();
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.groupService.remove(Number(id));
+  async remove(@UUIDParam('id') id: Uuid): Promise<GroupDto> {
+    const groupEntity = await this.groupService.remove(id);
+
+    return groupEntity.toDto();
   }
 }

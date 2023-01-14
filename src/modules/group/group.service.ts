@@ -46,14 +46,35 @@ export class GroupService {
     return groupEntity;
   }
 
-  update(id: number, updateGroupDto: UpdateGroupDto) {
-    return {
-      id,
-      group: updateGroupDto,
-    };
+  async update(id: Uuid, updateGroupDto: UpdateGroupDto): Promise<GroupEntity> {
+    const queryBuilder = this.groupRepository
+      .createQueryBuilder('group')
+      .where('group.id = :id', { id });
+
+    const groupEntity = await queryBuilder.getOne();
+
+    if (!groupEntity) {
+      throw new NotFoundException();
+    }
+
+    await this.groupRepository.update({ id }, updateGroupDto);
+
+    return groupEntity;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} group`;
+  async remove(id: Uuid) {
+    const queryBuilder = this.groupRepository
+      .createQueryBuilder('group')
+      .where('group.id = :id', { id });
+
+    const groupEntity = await queryBuilder.getOne();
+
+    if (!groupEntity) {
+      throw new NotFoundException();
+    }
+
+    await this.groupRepository.remove(groupEntity);
+
+    return groupEntity;
   }
 }
