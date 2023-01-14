@@ -12,6 +12,8 @@ import mailConfig from './config/mail.config';
 import { MailModule } from './mail/mail.module';
 import { MailConfigService } from './mail/mail-config.service';
 import { AuthModule } from './modules/auth/auth.module';
+import { DepartmentModule } from './modules/department/department.module';
+import { GroupModule } from './modules/group/group.module';
 import { HealthCheckerModule } from './modules/health-checker/health-checker.module';
 import { PostModule } from './modules/post/post.module';
 import { UserModule } from './modules/user/user.module';
@@ -50,6 +52,8 @@ import { SharedModule } from './shared/shared.module';
     }),
     HealthCheckerModule,
     MailModule,
+    GroupModule,
+    DepartmentModule,
   ],
   providers: [],
 })
