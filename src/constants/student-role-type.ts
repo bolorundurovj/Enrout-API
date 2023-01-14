@@ -1,0 +1,5 @@
+export enum StudentRoleType {
+  UNDERGRADUATE = 'UNDERGRADUATE',
+  GRADUATE = 'GRADUATE',
+  POSTGRADUATE = 'POSTGRADUATE',
+}
