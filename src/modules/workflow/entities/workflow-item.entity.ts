@@ -3,7 +3,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
 import type { IAbstractEntity } from '../../../common/abstract.entity';
 import { AbstractEntity } from '../../../common/abstract.entity';
 import { UseDto } from '../../../decorators';
-import { GroupEntity } from '../../group/entities/group.entity';
+import { GroupRoleEntity } from '../../group-role/entities/group-role.entity';
 import type { WorkflowItemDtoOptions } from '../dto/workflow-item.dto';
 import { WorkflowItemDto } from '../dto/workflow-item.dto';
 import { WorkflowEntity } from './workflow.entity';
@@ -29,11 +29,11 @@ export class WorkflowItemEntity
   workflowId: Uuid;
 
   @Column({ type: 'uuid', nullable: false })
-  groupId: Uuid;
+  groupRoleId: Uuid;
 
-  @OneToOne(() => GroupEntity)
-  @JoinColumn({ name: 'group_id' })
-  group: GroupEntity;
+  @OneToOne(() => GroupRoleEntity)
+  @JoinColumn({ name: 'group_role_id' })
+  groupRole: GroupRoleEntity;
 
   @ManyToOne(
     () => WorkflowEntity,

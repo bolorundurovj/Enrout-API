@@ -14,6 +14,7 @@ import { MailConfigService } from './mail/mail-config.service';
 import { AuthModule } from './modules/auth/auth.module';
 import { DepartmentModule } from './modules/department/department.module';
 import { GroupModule } from './modules/group/group.module';
+import { GroupRoleModule } from './modules/group-role/group-role.module';
 import { HealthCheckerModule } from './modules/health-checker/health-checker.module';
 import { PostModule } from './modules/post/post.module';
 import { StaffModule } from './modules/staff/staff.module';
@@ -60,6 +61,7 @@ import { SharedModule } from './shared/shared.module';
     WorkflowModule,
     StudentModule,
     StaffModule,
+    GroupRoleModule,
   ],
   providers: [],
 })
