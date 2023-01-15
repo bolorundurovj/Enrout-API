@@ -1,1 +1,0 @@
-const e=JSON.parse('{"key":"v-38073e5e","path":"/HISTORY.html","title":"","lang":"en-US","frontmatter":{},"headers":[{"level":3,"title":"Changelog","slug":"changelog","link":"#changelog","children":[]},{"level":2,"title":"1.0.0","slug":"_1-0-0","link":"#_1-0-0","children":[]}],"git":{"updatedTime":null,"contributors":[]},"filePathRelative":"HISTORY.md"}');export{e as data};
