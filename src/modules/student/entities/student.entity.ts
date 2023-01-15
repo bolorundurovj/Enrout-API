@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
 import type { IAbstractEntity } from '../../../common/abstract.entity';
 import { AbstractEntity } from '../../../common/abstract.entity';
@@ -78,7 +78,10 @@ export class StudentEntity
   @Column({ type: 'uuid', nullable: false })
   departmentId: Uuid;
 
-  @OneToOne(() => DepartmentEntity)
+  @ManyToOne(() => DepartmentEntity, (deptEntity) => deptEntity.students, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn({ name: 'department_id' })
   department: DepartmentEntity;
 

@@ -7,6 +7,8 @@ import { TokenType } from '../../constants';
 import { UserNotFoundException } from '../../exceptions';
 import { MailService } from '../../mail/mail.service';
 import { ApiConfigService } from '../../shared/services/api-config.service';
+import type { StudentEntity } from '../student/entities/student.entity';
+import { StudentService } from '../student/student.service';
 import type { UserEntity } from '../user/user.entity';
 import { UserService } from '../user/user.service';
 import { TokenPayloadDto } from './dto/TokenPayloadDto';
@@ -18,6 +20,7 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ApiConfigService,
     private userService: UserService,
+    private studentService: StudentService,
     private mailService: MailService,
   ) {}
 
@@ -37,6 +40,23 @@ export class AuthService {
 
   async validateUser(userLoginDto: UserLoginDto): Promise<UserEntity> {
     const user = await this.userService.findOne({
+      email: userLoginDto.email,
+    });
+
+    const isPasswordValid = await validateHash(
+      userLoginDto.password,
+      user?.password,
+    );
+
+    if (!isPasswordValid) {
+      throw new UserNotFoundException();
+    }
+
+    return user!;
+  }
+
+  async validateStudent(userLoginDto: UserLoginDto): Promise<StudentEntity> {
+    const user = await this.studentService.findOne({
       email: userLoginDto.email,
     });
 

@@ -22,6 +22,7 @@ import { AuthService } from './auth.service';
 import { ForgotPasswordDto } from './dto/ForgotPasswordDto';
 import { LoginPayloadDto } from './dto/LoginPayloadDto';
 import { ResetPasswordDto } from './dto/ResetPasswordDto';
+import { StudentLoginPayloadDto } from './dto/StudentLoginPayloadDto';
 import { StudentRegisterDto } from './dto/StudentRegisterDto';
 import { UserLoginDto } from './dto/UserLoginDto';
 import { UserRegisterDto } from './dto/UserRegisterDto';
@@ -70,6 +71,25 @@ export class AuthController {
     return createdUser.toDto({
       isActive: true,
     });
+  }
+
+  @Post('students/login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    type: LoginPayloadDto,
+    description: 'Student info with access token',
+  })
+  async studentLogin(
+    @Body() studentLoginDto: UserLoginDto,
+  ): Promise<StudentLoginPayloadDto> {
+    const userEntity = await this.authService.validateStudent(studentLoginDto);
+
+    const token = await this.authService.createAccessToken({
+      userId: userEntity.id,
+      role: RoleType.STUDENT,
+    });
+
+    return new StudentLoginPayloadDto(userEntity.toDto(), token);
   }
 
   @Post('students/register')

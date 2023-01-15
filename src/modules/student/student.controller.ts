@@ -30,7 +30,7 @@ export class StudentController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.studentService.findOne(Number(id));
+    return this.studentService.findById(Number(id));
   }
 
   @Patch(':id')

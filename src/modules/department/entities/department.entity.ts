@@ -1,10 +1,11 @@
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 
 import type { IAbstractEntity } from '../../../common/abstract.entity';
 import { AbstractEntity } from '../../../common/abstract.entity';
 import { UseDto } from '../../../decorators';
 import type { IGroupEntity } from '../../group/entities/group.entity';
 import { GroupEntity } from '../../group/entities/group.entity';
+import { StudentEntity } from '../../student/entities/student.entity';
 import { DepartmentDto } from '../dto/department.dto';
 
 export interface IDepartmentEntity extends IAbstractEntity<DepartmentDto> {
@@ -27,4 +28,7 @@ export class DepartmentEntity extends AbstractEntity<DepartmentDto> {
   })
   @JoinColumn({ name: 'group_id' })
   group: GroupEntity;
+
+  @OneToMany(() => StudentEntity, (studentEntity) => studentEntity.department)
+  students: StudentEntity[];
 }

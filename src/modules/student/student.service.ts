@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import type { FindOptionsWhere } from 'typeorm';
 import { Repository } from 'typeorm';
 import { Transactional } from 'typeorm-transactional-cls-hooked';
 
@@ -44,8 +45,14 @@ export class StudentService {
     return `This action returns all student`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} student`;
+  findOne(
+    findData: FindOptionsWhere<StudentEntity>,
+  ): Promise<StudentEntity | null> {
+    return this.studentRepository.findOneBy(findData);
+  }
+
+  findById(id: number) {
+    return `This action gets a #${id} student`;
   }
 
   update(id: number, updateStudentDto: UpdateStudentDto) {
