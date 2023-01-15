@@ -78,6 +78,50 @@ export class AuthController {
     });
   }
 
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    type: ForgotPasswordDto,
+    description: 'User info with access token',
+  })
+  async forgotUserPassword(
+    @Body() forgotPasswordDto: ForgotPasswordDto,
+  ): Promise<{ message: string }> {
+    await this.authService.forgotPassword(forgotPasswordDto.email);
+
+    return {
+      message: 'Reset Success',
+    };
+  }
+
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    type: ResetPasswordDto,
+    description: 'User info with access token',
+  })
+  async resetUserPassword(
+    @Body() resetPasswordDto: ResetPasswordDto,
+  ): Promise<{ message: string }> {
+    await this.authService.resetPassword(
+      resetPasswordDto.token,
+      resetPasswordDto.password,
+    );
+
+    return {
+      message: 'Reset Success',
+    };
+  }
+
+  @Version('1')
+  @Get('me')
+  @HttpCode(HttpStatus.OK)
+  @Auth([RoleType.USER, RoleType.ADMIN])
+  @ApiOkResponse({ type: UserDto, description: 'current user info' })
+  getCurrentUser(@AuthUser() user: UserEntity): UserDto {
+    return user.toDto();
+  }
+
   @Post('students/login')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
@@ -115,75 +159,6 @@ export class AuthController {
     });
   }
 
-  @Post('staff/login')
-  @HttpCode(HttpStatus.OK)
-  @ApiOkResponse({
-    type: LoginPayloadDto,
-    description: 'Staff info with access token',
-  })
-  async staffLogin(
-    @Body() staffLoginDto: UserLoginDto,
-  ): Promise<StaffLoginPayloadDto> {
-    const userEntity = await this.authService.validateStaff(staffLoginDto);
-
-    const token = await this.authService.createAccessToken({
-      userId: userEntity.id,
-      role: RoleType.STAFF,
-    });
-
-    return new StaffLoginPayloadDto(userEntity.toDto(), token);
-  }
-
-  @Post('staff/register')
-  @HttpCode(HttpStatus.OK)
-  @ApiOkResponse({ type: StaffDto, description: 'Successfully Registered' })
-  @ApiFile({ name: 'avatar' })
-  async staffRegister(
-    @Body() staffRegisterDto: StaffRegisterDto,
-    @UploadedFile() file?: IFile,
-  ): Promise<StaffDto> {
-    const createdUser = await this.staffService.create(staffRegisterDto, file);
-
-    return createdUser.toDto({
-      isActive: true,
-    });
-  }
-
-  @Post('forgot-password')
-  @HttpCode(HttpStatus.OK)
-  @ApiOkResponse({
-    type: ForgotPasswordDto,
-    description: 'User info with access token',
-  })
-  async forgotUserPassword(
-    @Body() forgotPasswordDto: ForgotPasswordDto,
-  ): Promise<{ message: string }> {
-    await this.authService.forgotPassword(forgotPasswordDto.email);
-
-    return {
-      message: 'Reset Success',
-    };
-  }
-
-  @Post('reset-password')
-  @HttpCode(HttpStatus.OK)
-  @ApiOkResponse({
-    type: ResetPasswordDto,
-    description: 'User info with access token',
-  })
-  async resetUserPassword(
-    @Body() resetPasswordDto: ResetPasswordDto,
-  ): Promise<{ message: string }> {
-    await this.authService.resetPassword(
-      resetPasswordDto.token,
-      resetPasswordDto.password,
-    );
-
-    return {
-      message: 'Reset Success',
-    };
-  }
-
   @Post('students/forgot-password')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
@@ -219,6 +194,40 @@ export class AuthController {
     };
   }
 
+  @Post('staff/login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    type: LoginPayloadDto,
+    description: 'Staff info with access token',
+  })
+  async staffLogin(
+    @Body() staffLoginDto: UserLoginDto,
+  ): Promise<StaffLoginPayloadDto> {
+    const userEntity = await this.authService.validateStaff(staffLoginDto);
+
+    const token = await this.authService.createAccessToken({
+      userId: userEntity.id,
+      role: RoleType.STAFF,
+    });
+
+    return new StaffLoginPayloadDto(userEntity.toDto(), token);
+  }
+
+  @Post('staff/register')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ type: StaffDto, description: 'Successfully Registered' })
+  @ApiFile({ name: 'avatar' })
+  async staffRegister(
+    @Body() staffRegisterDto: StaffRegisterDto,
+    @UploadedFile() file?: IFile,
+  ): Promise<StaffDto> {
+    const createdUser = await this.staffService.create(staffRegisterDto, file);
+
+    return createdUser.toDto({
+      isActive: true,
+    });
+  }
+
   @Post('staff/forgot-password')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
@@ -252,14 +261,5 @@ export class AuthController {
     return {
       message: 'Reset Success',
     };
-  }
-
-  @Version('1')
-  @Get('me')
-  @HttpCode(HttpStatus.OK)
-  @Auth([RoleType.USER, RoleType.ADMIN])
-  @ApiOkResponse({ type: UserDto, description: 'current user info' })
-  getCurrentUser(@AuthUser() user: UserEntity): UserDto {
-    return user.toDto();
   }
 }
