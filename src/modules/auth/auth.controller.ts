@@ -13,6 +13,8 @@ import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { RoleType } from '../../constants';
 import { ApiFile, Auth, AuthUser } from '../../decorators';
 import { IFile } from '../../interfaces';
+import { StudentDto } from '../student/dto/student.dto';
+import { StudentService } from '../student/student.service';
 import { UserDto } from '../user/dtos/user.dto';
 import { UserEntity } from '../user/user.entity';
 import { UserService } from '../user/user.service';
@@ -20,6 +22,7 @@ import { AuthService } from './auth.service';
 import { ForgotPasswordDto } from './dto/ForgotPasswordDto';
 import { LoginPayloadDto } from './dto/LoginPayloadDto';
 import { ResetPasswordDto } from './dto/ResetPasswordDto';
+import { StudentRegisterDto } from './dto/StudentRegisterDto';
 import { UserLoginDto } from './dto/UserLoginDto';
 import { UserRegisterDto } from './dto/UserRegisterDto';
 
@@ -29,6 +32,7 @@ export class AuthController {
   constructor(
     private userService: UserService,
     private authService: AuthService,
+    private studentService: StudentService,
   ) {}
 
   @Post('login')
@@ -60,6 +64,24 @@ export class AuthController {
   ): Promise<UserDto> {
     const createdUser = await this.userService.createUser(
       userRegisterDto,
+      file,
+    );
+
+    return createdUser.toDto({
+      isActive: true,
+    });
+  }
+
+  @Post('students/register')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ type: StudentDto, description: 'Successfully Registered' })
+  @ApiFile({ name: 'avatar' })
+  async studentRegister(
+    @Body() studentRegisterDto: StudentRegisterDto,
+    @UploadedFile() file?: IFile,
+  ): Promise<StudentDto> {
+    const createdUser = await this.studentService.create(
+      studentRegisterDto,
       file,
     );
 

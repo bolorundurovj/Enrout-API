@@ -1,12 +1,43 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Transactional } from 'typeorm-transactional-cls-hooked';
 
-import type { CreateStudentDto } from './dto/create-student.dto';
+import { FileNotImageException } from '../../exceptions';
+import { IFile } from '../../interfaces';
+import { AwsS3Service } from '../../shared/services/aws-s3.service';
+import { ValidatorService } from '../../shared/services/validator.service';
+import { CreateStudentDto } from './dto/create-student.dto';
 import type { UpdateStudentDto } from './dto/update-student.dto';
+import { StudentEntity } from './entities/student.entity';
 
 @Injectable()
 export class StudentService {
-  create(createStudentDto: CreateStudentDto) {
-    return createStudentDto;
+  constructor(
+    @InjectRepository(StudentEntity)
+    private studentRepository: Repository<StudentEntity>,
+    private awsS3Service: AwsS3Service,
+    private validatorService: ValidatorService,
+  ) {}
+
+  @Transactional()
+  async create(
+    createStudentDto: CreateStudentDto,
+    file?: IFile,
+  ): Promise<StudentEntity> {
+    const student = this.studentRepository.create(createStudentDto);
+
+    if (file && !this.validatorService.isImage(file.mimetype)) {
+      throw new FileNotImageException();
+    }
+
+    if (file) {
+      student.avatar = await this.awsS3Service.uploadImage(file);
+    }
+
+    await this.studentRepository.save(student);
+
+    return student;
   }
 
   findAll() {

@@ -5,6 +5,7 @@ import {
   IsOptional,
   IsPhoneNumber,
   IsString,
+  IsUUID,
   MinLength,
 } from 'class-validator';
 import { Column } from 'typeorm';
@@ -39,6 +40,12 @@ export class StudentRegisterDto {
   @Trim()
   readonly matricNo: string;
 
+  @ApiProperty()
+  @IsUUID()
+  @IsNotEmpty()
+  @Trim()
+  departmentId: Uuid;
+
   @ApiProperty({ minLength: 6 })
   @IsString()
   @MinLength(6)
@@ -48,5 +55,5 @@ export class StudentRegisterDto {
   @Column()
   @IsPhoneNumber()
   @IsOptional()
-  phone: string;
+  phone?: string;
 }

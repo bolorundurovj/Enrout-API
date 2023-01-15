@@ -4,6 +4,7 @@ import { PassportModule } from '@nestjs/passport';
 
 import { MailModule } from '../../mail/mail.module';
 import { ApiConfigService } from '../../shared/services/api-config.service';
+import { StudentModule } from '../student/student.module';
 import { UserModule } from '../user/user.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
@@ -33,6 +34,7 @@ import { PublicStrategy } from './public.strategy';
       inject: [ApiConfigService],
     }),
     MailModule,
+    StudentModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, PublicStrategy],
