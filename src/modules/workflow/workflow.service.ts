@@ -1,30 +1,83 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Transactional } from 'typeorm-transactional-cls-hooked';
 
-import type { CreateWorkflowDto } from './dto/create-workflow.dto';
+import type { PageDto } from '../../common/dto/page.dto';
+import type { PageOptionsDto } from '../../common/dto/page-options.dto';
+import { CreateWorkflowDto } from './dto/create-workflow.dto';
 import type { UpdateWorkflowDto } from './dto/update-workflow.dto';
+import type { WorkflowDto } from './dto/workflow.dto';
+import { WorkflowEntity } from './entities/workflow.entity';
 
 @Injectable()
 export class WorkflowService {
-  create(createWorkflowDto: CreateWorkflowDto) {
-    return createWorkflowDto;
+  constructor(
+    @InjectRepository(WorkflowEntity)
+    private workflowRepository: Repository<WorkflowEntity>,
+  ) {}
+
+  @Transactional()
+  async create(createWorkflowDto: CreateWorkflowDto) {
+    const workflow = this.workflowRepository.create(createWorkflowDto);
+    await this.workflowRepository.save(workflow);
+
+    return workflow;
   }
 
-  findAll() {
-    return `This action returns all workflow`;
+  async findAll(pageOptionsDto: PageOptionsDto): Promise<PageDto<WorkflowDto>> {
+    const queryBuilder = this.workflowRepository.createQueryBuilder('workflow');
+    const [items, pageMetaDto] = await queryBuilder.paginate(pageOptionsDto);
+
+    return items.toPageDto(pageMetaDto);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} workflow`;
+  async findOne(id: Uuid): Promise<WorkflowEntity> {
+    const queryBuilder = this.workflowRepository
+      .createQueryBuilder('workflow')
+      .where('workflow.id = :id', { id });
+
+    const workflowEntity = await queryBuilder.getOne();
+
+    if (!workflowEntity) {
+      throw new NotFoundException();
+    }
+
+    return workflowEntity;
   }
 
-  update(id: number, updateWorkflowDto: UpdateWorkflowDto) {
-    return {
-      id,
-      workflow: updateWorkflowDto,
-    };
+  async update(
+    id: Uuid,
+    updateWorkflowDto: UpdateWorkflowDto,
+  ): Promise<WorkflowEntity> {
+    const queryBuilder = this.workflowRepository
+      .createQueryBuilder('workflow')
+      .where('workflow.id = :id', { id });
+
+    const workflowEntity = await queryBuilder.getOne();
+
+    if (!workflowEntity) {
+      throw new NotFoundException();
+    }
+
+    await this.workflowRepository.update({ id }, updateWorkflowDto);
+
+    return workflowEntity;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} workflow`;
+  async remove(id: Uuid) {
+    const queryBuilder = this.workflowRepository
+      .createQueryBuilder('workflow')
+      .where('workflow.id = :id', { id });
+
+    const workflowEntity = await queryBuilder.getOne();
+
+    if (!workflowEntity) {
+      throw new NotFoundException();
+    }
+
+    await this.workflowRepository.remove(workflowEntity);
+
+    return workflowEntity;
   }
 }
