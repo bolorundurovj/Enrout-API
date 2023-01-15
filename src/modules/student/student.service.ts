@@ -8,7 +8,9 @@ import { FileNotImageException } from '../../exceptions';
 import { IFile } from '../../interfaces';
 import { AwsS3Service } from '../../shared/services/aws-s3.service';
 import { ValidatorService } from '../../shared/services/validator.service';
+import type { UserDto } from '../user/dtos/user.dto';
 import { CreateStudentDto } from './dto/create-student.dto';
+import type { StudentDto } from './dto/student.dto';
 import type { UpdateStudentDto } from './dto/update-student.dto';
 import { StudentEntity } from './entities/student.entity';
 
@@ -64,5 +66,28 @@ export class StudentService {
 
   remove(id: number) {
     return `This action removes a #${id} student`;
+  }
+
+  async saveToken(
+    user: StudentEntity,
+    hash: string,
+    tokenExpiry: Date,
+  ): Promise<StudentDto> {
+    user.token = hash;
+    const userEntity = await this.studentRepository.update(
+      { id: user.id },
+      { token: hash, tokenExpiry },
+    );
+
+    return userEntity.raw;
+  }
+
+  async savePassword(user: StudentEntity, password: string): Promise<UserDto> {
+    const userEntity = await this.studentRepository.update(
+      { id: user.id },
+      { token: null!, tokenExpiry: null!, password },
+    );
+
+    return userEntity.raw;
   }
 }

@@ -9,6 +9,7 @@ import { IFile } from '../../interfaces';
 import { AwsS3Service } from '../../shared/services/aws-s3.service';
 import { ValidatorService } from '../../shared/services/validator.service';
 import { CreateStaffDto } from './dto/create-staff.dto';
+import type { StaffDto } from './dto/staff.dto';
 import type { UpdateStaffDto } from './dto/update-staff.dto';
 import { StaffEntity } from './entities/staff.entity';
 
@@ -64,5 +65,28 @@ export class StaffService {
 
   remove(id: number) {
     return `This action removes a #${id} staff`;
+  }
+
+  async saveToken(
+    user: StaffEntity,
+    hash: string,
+    tokenExpiry: Date,
+  ): Promise<StaffDto> {
+    user.token = hash;
+    const userEntity = await this.staffRepository.update(
+      { id: user.id },
+      { token: hash, tokenExpiry },
+    );
+
+    return userEntity.raw;
+  }
+
+  async savePassword(user: StaffEntity, password: string): Promise<StaffDto> {
+    const userEntity = await this.staffRepository.update(
+      { id: user.id },
+      { token: null!, tokenExpiry: null!, password },
+    );
+
+    return userEntity.raw;
   }
 }

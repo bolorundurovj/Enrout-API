@@ -184,6 +184,76 @@ export class AuthController {
     };
   }
 
+  @Post('students/forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    type: ForgotPasswordDto,
+    description: 'User info with access token',
+  })
+  async forgotStudentPassword(
+    @Body() forgotPasswordDto: ForgotPasswordDto,
+  ): Promise<{ message: string }> {
+    await this.authService.forgotStudentPassword(forgotPasswordDto.email);
+
+    return {
+      message: 'Reset Success',
+    };
+  }
+
+  @Post('students/reset-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    type: ResetPasswordDto,
+    description: 'User info with access token',
+  })
+  async resetStudentPassword(
+    @Body() resetPasswordDto: ResetPasswordDto,
+  ): Promise<{ message: string }> {
+    await this.authService.resetStudentPassword(
+      resetPasswordDto.token,
+      resetPasswordDto.password,
+    );
+
+    return {
+      message: 'Reset Success',
+    };
+  }
+
+  @Post('staff/forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    type: ForgotPasswordDto,
+    description: 'User info with access token',
+  })
+  async forgotStaffPassword(
+    @Body() forgotPasswordDto: ForgotPasswordDto,
+  ): Promise<{ message: string }> {
+    await this.authService.forgotStaffPassword(forgotPasswordDto.email);
+
+    return {
+      message: 'Reset Success',
+    };
+  }
+
+  @Post('staff/reset-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    type: ResetPasswordDto,
+    description: 'User info with access token',
+  })
+  async resetStaffPassword(
+    @Body() resetPasswordDto: ResetPasswordDto,
+  ): Promise<{ message: string }> {
+    await this.authService.resetStaffPassword(
+      resetPasswordDto.token,
+      resetPasswordDto.password,
+    );
+
+    return {
+      message: 'Reset Success',
+    };
+  }
+
   @Version('1')
   @Get('me')
   @HttpCode(HttpStatus.OK)

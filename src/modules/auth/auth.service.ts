@@ -138,6 +138,98 @@ export class AuthService {
     }
   }
 
+  async resetStudentPassword(token: string, password: string) {
+    try {
+      if (this.jwtService.verify(token)) {
+        const decodedToken = this.jwtService.decode(token)!;
+        const { userId } = <{ userId: Uuid }>decodedToken;
+        const user = await this.studentService.findOne({
+          id: userId,
+        });
+
+        if (!user) {
+          return new UserNotFoundException();
+        }
+
+        await this.studentService.savePassword(user, password);
+      }
+    } catch (error) {
+      console.error(error);
+
+      throw new BadRequestException();
+    }
+  }
+
+  async forgotStudentPassword(email: string): Promise<void> {
+    const user = await this.studentService.findOne({
+      email,
+    });
+
+    if (!user) {
+      throw new UserNotFoundException();
+    } else {
+      const jwt = await this.createWeakAuthToken({ userId: user.id });
+
+      const tokenExpiry = new Date(Date.now() + jwt.expiresIn * 1000);
+
+      await this.studentService.saveToken(user, jwt.accessToken, tokenExpiry);
+
+      await this.mailService.forgotPassword({
+        to: email,
+        data: {
+          hash: jwt.accessToken,
+          expires: jwt.expiresIn / 60,
+        },
+      });
+    }
+  }
+
+  async resetStaffPassword(token: string, password: string) {
+    try {
+      if (this.jwtService.verify(token)) {
+        const decodedToken = this.jwtService.decode(token)!;
+        const { userId } = <{ userId: Uuid }>decodedToken;
+        const user = await this.staffService.findOne({
+          id: userId,
+        });
+
+        if (!user) {
+          return new UserNotFoundException();
+        }
+
+        await this.staffService.savePassword(user, password);
+      }
+    } catch (error) {
+      console.error(error);
+
+      throw new BadRequestException();
+    }
+  }
+
+  async forgotStaffPassword(email: string): Promise<void> {
+    const user = await this.staffService.findOne({
+      email,
+    });
+
+    if (!user) {
+      throw new UserNotFoundException();
+    } else {
+      const jwt = await this.createWeakAuthToken({ userId: user.id });
+
+      const tokenExpiry = new Date(Date.now() + jwt.expiresIn * 1000);
+
+      await this.staffService.saveToken(user, jwt.accessToken, tokenExpiry);
+
+      await this.mailService.forgotPassword({
+        to: email,
+        data: {
+          hash: jwt.accessToken,
+          expires: jwt.expiresIn / 60,
+        },
+      });
+    }
+  }
+
   async createWeakAuthToken(data: { userId: Uuid }): Promise<TokenPayloadDto> {
     return new TokenPayloadDto({
       expiresIn: this.configService.authConfig.secondaryJwtExpirationTime,
