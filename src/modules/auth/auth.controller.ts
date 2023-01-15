@@ -13,6 +13,8 @@ import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { RoleType } from '../../constants';
 import { ApiFile, Auth, AuthUser } from '../../decorators';
 import { IFile } from '../../interfaces';
+import { StaffDto } from '../staff/dto/staff.dto';
+import { StaffService } from '../staff/staff.service';
 import { StudentDto } from '../student/dto/student.dto';
 import { StudentService } from '../student/student.service';
 import { UserDto } from '../user/dtos/user.dto';
@@ -22,6 +24,8 @@ import { AuthService } from './auth.service';
 import { ForgotPasswordDto } from './dto/ForgotPasswordDto';
 import { LoginPayloadDto } from './dto/LoginPayloadDto';
 import { ResetPasswordDto } from './dto/ResetPasswordDto';
+import { StaffLoginPayloadDto } from './dto/StaffLoginPayloadDto';
+import { StaffRegisterDto } from './dto/StaffRegisterDto';
 import { StudentLoginPayloadDto } from './dto/StudentLoginPayloadDto';
 import { StudentRegisterDto } from './dto/StudentRegisterDto';
 import { UserLoginDto } from './dto/UserLoginDto';
@@ -34,6 +38,7 @@ export class AuthController {
     private userService: UserService,
     private authService: AuthService,
     private studentService: StudentService,
+    private staffService: StaffService,
   ) {}
 
   @Post('login')
@@ -104,6 +109,40 @@ export class AuthController {
       studentRegisterDto,
       file,
     );
+
+    return createdUser.toDto({
+      isActive: true,
+    });
+  }
+
+  @Post('staff/login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    type: LoginPayloadDto,
+    description: 'Staff info with access token',
+  })
+  async staffLogin(
+    @Body() staffLoginDto: UserLoginDto,
+  ): Promise<StaffLoginPayloadDto> {
+    const userEntity = await this.authService.validateStaff(staffLoginDto);
+
+    const token = await this.authService.createAccessToken({
+      userId: userEntity.id,
+      role: RoleType.STAFF,
+    });
+
+    return new StaffLoginPayloadDto(userEntity.toDto(), token);
+  }
+
+  @Post('staff/register')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ type: StaffDto, description: 'Successfully Registered' })
+  @ApiFile({ name: 'avatar' })
+  async staffRegister(
+    @Body() staffRegisterDto: StaffRegisterDto,
+    @UploadedFile() file?: IFile,
+  ): Promise<StaffDto> {
+    const createdUser = await this.staffService.create(staffRegisterDto, file);
 
     return createdUser.toDto({
       isActive: true,

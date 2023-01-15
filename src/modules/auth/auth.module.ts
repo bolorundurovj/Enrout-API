@@ -4,6 +4,7 @@ import { PassportModule } from '@nestjs/passport';
 
 import { MailModule } from '../../mail/mail.module';
 import { ApiConfigService } from '../../shared/services/api-config.service';
+import { StaffModule } from '../staff/staff.module';
 import { StudentModule } from '../student/student.module';
 import { UserModule } from '../user/user.module';
 import { AuthController } from './auth.controller';
@@ -35,6 +36,7 @@ import { PublicStrategy } from './public.strategy';
     }),
     MailModule,
     StudentModule,
+    StaffModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, PublicStrategy],

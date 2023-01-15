@@ -7,6 +7,8 @@ import { TokenType } from '../../constants';
 import { UserNotFoundException } from '../../exceptions';
 import { MailService } from '../../mail/mail.service';
 import { ApiConfigService } from '../../shared/services/api-config.service';
+import type { StaffEntity } from '../staff/entities/staff.entity';
+import { StaffService } from '../staff/staff.service';
 import type { StudentEntity } from '../student/entities/student.entity';
 import { StudentService } from '../student/student.service';
 import type { UserEntity } from '../user/user.entity';
@@ -21,6 +23,7 @@ export class AuthService {
     private configService: ApiConfigService,
     private userService: UserService,
     private studentService: StudentService,
+    private staffService: StaffService,
     private mailService: MailService,
   ) {}
 
@@ -57,6 +60,23 @@ export class AuthService {
 
   async validateStudent(userLoginDto: UserLoginDto): Promise<StudentEntity> {
     const user = await this.studentService.findOne({
+      email: userLoginDto.email,
+    });
+
+    const isPasswordValid = await validateHash(
+      userLoginDto.password,
+      user?.password,
+    );
+
+    if (!isPasswordValid) {
+      throw new UserNotFoundException();
+    }
+
+    return user!;
+  }
+
+  async validateStaff(userLoginDto: UserLoginDto): Promise<StaffEntity> {
+    const user = await this.staffService.findOne({
       email: userLoginDto.email,
     });
 

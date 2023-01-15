@@ -30,7 +30,7 @@ export class StaffController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.staffService.findOne(Number(id));
+    return this.staffService.findById(Number(id));
   }
 
   @Patch(':id')
