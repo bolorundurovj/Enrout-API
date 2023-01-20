@@ -108,6 +108,11 @@ export class ApiConfigService {
       migrationsRun: true,
       logging: this.getBoolean('ENABLE_ORM_LOGS'),
       namingStrategy: new SnakeNamingStrategy(),
+      ssl: this.isProduction
+        ? {
+            rejectUnauthorized: false,
+          }
+        : undefined,
     };
   }
 
