@@ -10,6 +10,8 @@ import { SnakeNamingStrategy } from './src/snake-naming.strategy';
 
 dotenv.config();
 
+const isProd = process.env.NODE_ENV === 'production';
+
 export const dataSource = new DataSource({
   type: 'postgres',
   host: process.env.DB_HOST,
@@ -24,4 +26,9 @@ export const dataSource = new DataSource({
     'src/modules/**/*.view-entity{.ts,.js}',
   ],
   migrations: ['src/database/migrations/*{.ts,.js}'],
+  ssl: isProd
+    ? {
+        rejectUnauthorized: false,
+      }
+    : undefined,
 });
