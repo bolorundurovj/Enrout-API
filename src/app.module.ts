@@ -23,6 +23,7 @@ import { UserModule } from './modules/user/user.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
 import { ApiConfigService } from './shared/services/api-config.service';
 import { SharedModule } from './shared/shared.module';
+import { DocumentModule } from './modules/document/document.module';
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { SharedModule } from './shared/shared.module';
     StudentModule,
     StaffModule,
     GroupRoleModule,
+    DocumentModule,
   ],
   providers: [],
 })
