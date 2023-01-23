@@ -31,8 +31,8 @@ export class DocumentController {
     @Body() createDocumentDto: CreateDocumentDto,
     @AuthUser() user: StudentEntity | StaffEntity,
   ) {
-    console.log(user)
-    console.log(createDocumentDto)
+    console.log(user);
+    console.log(createDocumentDto);
     const docEntity = await this.documentService.create(
       user.id,
       createDocumentDto,

@@ -13,6 +13,7 @@ import { MailModule } from './mail/mail.module';
 import { MailConfigService } from './mail/mail-config.service';
 import { AuthModule } from './modules/auth/auth.module';
 import { DepartmentModule } from './modules/department/department.module';
+import { DocumentModule } from './modules/document/document.module';
 import { GroupModule } from './modules/group/group.module';
 import { GroupRoleModule } from './modules/group-role/group-role.module';
 import { HealthCheckerModule } from './modules/health-checker/health-checker.module';
@@ -23,7 +24,6 @@ import { UserModule } from './modules/user/user.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
 import { ApiConfigService } from './shared/services/api-config.service';
 import { SharedModule } from './shared/shared.module';
-import { DocumentModule } from './modules/document/document.module';
 
 @Module({
   imports: [
