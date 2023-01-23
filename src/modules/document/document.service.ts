@@ -32,7 +32,26 @@ export class DocumentService {
   }
 
   async findAll(pageOptionsDto: PageOptionsDto): Promise<PageDto<DocumentDto>> {
-    const queryBuilder = this.docRepository.createQueryBuilder('doc');
+    const queryBuilder = this.docRepository
+      .createQueryBuilder('doc')
+      .leftJoin('doc.owner', 'owner')
+      .addSelect([
+        'owner.id',
+        'owner.firstName',
+        'owner.lastName',
+        'owner.matricNo',
+        'owner.role',
+        'owner.email',
+        'owner.departmentId',
+      ])
+      .leftJoinAndSelect('doc.currentlyAssigned', 'currentlyAssigned')
+      .addSelect([
+        'currentlyAssigned.id',
+        'currentlyAssigned.firstName',
+        'currentlyAssigned.lastName',
+      ])
+      .leftJoinAndSelect('doc.workflow', 'workflow')
+      .addSelect(['workflow.id', 'workflow.name']);
     const [items, pageMetaDto] = await queryBuilder.paginate(pageOptionsDto);
 
     return items.toPageDto(pageMetaDto);
@@ -41,7 +60,25 @@ export class DocumentService {
   async findOne(id: Uuid): Promise<DocumentEntity> {
     const queryBuilder = this.docRepository
       .createQueryBuilder('doc')
-      .where('doc.id = :id', { id });
+      .where('doc.id = :id', { id })
+      .leftJoin('doc.owner', 'owner')
+      .addSelect([
+        'owner.id',
+        'owner.firstName',
+        'owner.lastName',
+        'owner.matricNo',
+        'owner.role',
+        'owner.email',
+        'owner.departmentId',
+      ])
+      .leftJoinAndSelect('doc.currentlyAssigned', 'currentlyAssigned')
+      .addSelect([
+        'currentlyAssigned.id',
+        'currentlyAssigned.firstName',
+        'currentlyAssigned.lastName',
+      ])
+      .leftJoinAndSelect('doc.workflow', 'workflow')
+      .addSelect(['workflow.id', 'workflow.name']);
 
     const docEntity = await queryBuilder.getOne();
 
