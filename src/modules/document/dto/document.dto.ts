@@ -2,10 +2,10 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 import { AbstractDto } from '../../../common/dto/abstract.dto';
 import { DocumentState } from '../../../constants';
+import { StaffEntity } from '../../staff/entities/staff.entity';
+import { StudentEntity } from '../../student/entities/student.entity';
+import { WorkflowEntity } from '../../workflow/entities/workflow.entity';
 import type { DocumentEntity } from '../entities/document.entity';
-import {WorkflowEntity} from "../../workflow/entities/workflow.entity";
-import {StaffEntity} from "../../staff/entities/staff.entity";
-import {StudentEntity} from "../../student/entities/student.entity";
 
 export class DocumentDto extends AbstractDto {
   @ApiProperty()

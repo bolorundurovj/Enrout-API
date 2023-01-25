@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
 
 import type { IAbstractEntity } from '../../../common/abstract.entity';
 import { AbstractEntity } from '../../../common/abstract.entity';
@@ -62,7 +62,7 @@ export class DocumentEntity extends AbstractEntity<DocumentDto> {
   @JoinColumn()
   workflow: WorkflowEntity;
 
-  @OneToOne(() => StudentEntity)
+  @ManyToOne(() => StudentEntity)
   @JoinColumn()
   owner: StudentEntity;
 
