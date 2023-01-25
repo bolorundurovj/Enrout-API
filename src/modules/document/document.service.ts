@@ -157,14 +157,19 @@ export class DocumentService {
   }
 
   /**
-   * > This function will update the state of a document to REJECTED
-   * @param {Uuid} id - Uuid - the id of the document to reject
+   * "Reject a document by a user."
+   *
+   * The first thing we do is create a query builder. This is a special object that allows us to build a query to the
+   * database. We use it to find the document that we want to reject
+   * @param {Uuid} userId - Uuid - the user id of the user who is rejecting the document
+   * @param {Uuid} docId - Uuid - The id of the document to be rejected
    * @returns DocumentEntity
    */
-  async rejectDocument(id: Uuid): Promise<DocumentEntity> {
+  async rejectDocument(userId: Uuid, docId: Uuid): Promise<DocumentEntity> {
     const queryBuilder = this.docRepository
       .createQueryBuilder('doc')
-      .where('doc.id = :id', { id });
+      .where('doc.id = :id', { id: docId })
+      .andWhere('doc.currentlyAssigned = :id', { id: userId });
 
     const docEntity = await queryBuilder.getOne();
 
@@ -172,22 +177,36 @@ export class DocumentService {
       throw new NotFoundException();
     }
 
-    await this.docRepository.update({ id }, { state: DocumentState.REJECTED });
+    await this.docRepository.update(
+      { id: docId },
+      { state: DocumentState.REJECTED },
+    );
 
     return docEntity;
   }
 
   /**
-   * It takes a staffId and a docId, and then it updates the document with the given docId to have the given staffId as the
-   * currentlyAssignedId
-   * @param {Uuid} staffId - Uuid - The staff member's ID
-   * @param {Uuid} docId - Uuid - The id of the document to be forwarded
+   * "Forward a document to another staff member."
+   *
+   * The function takes in three parameters:
+   *
+   * - userId: The ID of the user who is forwarding the document.
+   * - staffId: The ID of the staff member to whom the document is being forwarded.
+   * - docId: The ID of the document being forwarded
+   * @param {Uuid} userId - The id of the user who is forwarding the document
+   * @param {Uuid} staffId - The id of the staff member to whom the document is being forwarded.
+   * @param {Uuid} docId - The id of the document to be forwarded
    * @returns DocumentEntity
    */
-  async forwardDocument(staffId: Uuid, docId: Uuid): Promise<DocumentEntity> {
+  async forwardDocument(
+    userId: Uuid,
+    staffId: Uuid,
+    docId: Uuid,
+  ): Promise<DocumentEntity> {
     const queryBuilder = this.docRepository
       .createQueryBuilder('doc')
-      .where('doc.id = :id', { id: docId });
+      .where('doc.id = :id', { id: docId })
+      .andWhere('doc.currentlyAssigned = :id', { id: userId });
 
     const docEntity = await queryBuilder.getOne();
 
@@ -239,8 +258,7 @@ export class DocumentService {
    */
   async publishDocument(
     studentId: Uuid,
-    staffId,
-    Uuid,
+    staffId: Uuid,
     docId: Uuid,
   ): Promise<DocumentEntity> {
     const queryBuilder = this.docRepository
@@ -355,6 +373,86 @@ export class DocumentService {
     }
 
     await this.docRepository.update({ id: docId }, updateDocumentDto);
+
+    return docEntity;
+  }
+
+  /**
+   * It returns a document entity with the specified id, owned by the specified student, with the owner, currently assigned
+   * and workflow details
+   * @param {Uuid} studentId - Uuid - This is the id of the student who owns the document.
+   * @param {Uuid} id - Uuid - This is the id of the document you want to retrieve.
+   * @returns A document entity
+   */
+  async studentFindOne(studentId: Uuid, id: Uuid): Promise<DocumentEntity> {
+    const queryBuilder = this.docRepository
+      .createQueryBuilder('doc')
+      .where('doc.id = :id', { id })
+      .andWhere('doc.ownerId = :id', { id: studentId })
+      .leftJoin('doc.owner', 'owner')
+      .addSelect([
+        'owner.id',
+        'owner.firstName',
+        'owner.lastName',
+        'owner.matricNo',
+        'owner.role',
+        'owner.email',
+        'owner.departmentId',
+      ])
+      .leftJoinAndSelect('doc.currentlyAssigned', 'currentlyAssigned')
+      .addSelect([
+        'currentlyAssigned.id',
+        'currentlyAssigned.firstName',
+        'currentlyAssigned.lastName',
+      ])
+      .leftJoinAndSelect('doc.workflow', 'workflow')
+      .addSelect(['workflow.id', 'workflow.name']);
+
+    const docEntity = await queryBuilder.getOne();
+
+    if (!docEntity) {
+      throw new NotFoundException();
+    }
+
+    return docEntity;
+  }
+
+  /**
+   * It returns a document entity with the specified id, and the owner, currentlyAssigned and workflow entities associated
+   * with it
+   * @param {Uuid} staffId - Uuid - This is the id of the staff that is currently logged in.
+   * @param {Uuid} id - Uuid - This is the id of the document you want to retrieve.
+   * @returns A document entity
+   */
+  async staffFindOne(staffId: Uuid, id: Uuid): Promise<DocumentEntity> {
+    const queryBuilder = this.docRepository
+      .createQueryBuilder('doc')
+      .where('doc.id = :id', { id })
+      .andWhere('doc.currentlyAssignedId = :id', { id: staffId })
+      .leftJoin('doc.owner', 'owner')
+      .addSelect([
+        'owner.id',
+        'owner.firstName',
+        'owner.lastName',
+        'owner.matricNo',
+        'owner.role',
+        'owner.email',
+        'owner.departmentId',
+      ])
+      .leftJoinAndSelect('doc.currentlyAssigned', 'currentlyAssigned')
+      .addSelect([
+        'currentlyAssigned.id',
+        'currentlyAssigned.firstName',
+        'currentlyAssigned.lastName',
+      ])
+      .leftJoinAndSelect('doc.workflow', 'workflow')
+      .addSelect(['workflow.id', 'workflow.name']);
+
+    const docEntity = await queryBuilder.getOne();
+
+    if (!docEntity) {
+      throw new NotFoundException();
+    }
 
     return docEntity;
   }
