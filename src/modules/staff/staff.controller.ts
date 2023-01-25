@@ -3,13 +3,17 @@ import {
   Controller,
   Delete,
   Get,
-  Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
+import type { PageDto } from '../../common/dto/page.dto';
+import { PageOptionsDto } from '../../common/dto/page-options.dto';
+import { UUIDParam } from '../../decorators';
 import { CreateStaffDto } from './dto/create-staff.dto';
+import type { StaffDto } from './dto/staff.dto';
 import { UpdateStaffDto } from './dto/update-staff.dto';
 import { StaffService } from './staff.service';
 
@@ -19,27 +23,40 @@ export class StaffController {
   constructor(private readonly staffService: StaffService) {}
 
   @Post()
-  create(@Body() createStaffDto: CreateStaffDto) {
-    return this.staffService.create(createStaffDto);
+  async create(@Body() createStaffDto: CreateStaffDto) {
+    const staffEntity = await this.staffService.create(createStaffDto);
+
+    return staffEntity.toDto({ isActive: true });
   }
 
   @Get()
-  findAll() {
-    return this.staffService.findAll();
+  async findAll(
+    @Query() pageOptionsDto: PageOptionsDto,
+  ): Promise<PageDto<StaffDto>> {
+    return this.staffService.findAll(pageOptionsDto);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.staffService.findById(Number(id));
+  async findOne(@UUIDParam('id') id: Uuid): Promise<StaffDto> {
+    const staffEntity = await this.staffService.findById(id);
+
+    return staffEntity.toDto({ isActive: true });
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateStaffDto: UpdateStaffDto) {
-    return this.staffService.update(Number(id), updateStaffDto);
+  async update(
+    @UUIDParam('id') id: Uuid,
+    @Body() updateStaffDto: UpdateStaffDto,
+  ): Promise<StaffDto> {
+    const staffEntity = await this.staffService.update(id, updateStaffDto);
+
+    return staffEntity.toDto({ isActive: true });
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.staffService.remove(Number(id));
+  async remove(@UUIDParam('id') id: Uuid): Promise<StaffDto> {
+    const staffEntity = await this.staffService.remove(id);
+
+    return staffEntity.toDto({ isActive: true });
   }
 }
