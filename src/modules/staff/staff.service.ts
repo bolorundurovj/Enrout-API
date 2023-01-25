@@ -1,9 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { FindOptionsWhere } from 'typeorm';
 import { Repository } from 'typeorm';
 import { Transactional } from 'typeorm-transactional-cls-hooked';
 
+import type { PageDto } from '../../common/dto/page.dto';
+import type { PageOptionsDto } from '../../common/dto/page-options.dto';
 import { FileNotImageException } from '../../exceptions';
 import { IFile } from '../../interfaces';
 import { AwsS3Service } from '../../shared/services/aws-s3.service';
@@ -23,6 +25,12 @@ export class StaffService {
   ) {}
 
   @Transactional()
+  /**
+   * It creates a new staff member, uploads the avatar to AWS S3, and saves the staff member to the database
+   * @param {CreateStaffDto} createStaffDto - CreateStaffDto - This is the DTO that we created earlier.
+   * @param {IFile} [file] - The file that was uploaded.
+   * @returns StaffEntity
+   */
   async create(
     createStaffDto: CreateStaffDto,
     file?: IFile,
@@ -42,31 +50,98 @@ export class StaffService {
     return staff;
   }
 
-  findAll() {
-    return `This action returns all staff`;
+  /**
+   * It takes a PageOptionsDto object, creates a query builder, paginates the query, and returns a PageDto object
+   * @param {PageOptionsDto} pageOptionsDto - This is a class that contains the page number and the page size.
+   * @returns A PageDto<StaffDto>
+   */
+  async findAll(pageOptionsDto: PageOptionsDto): Promise<PageDto<StaffDto>> {
+    const queryBuilder = this.staffRepository.createQueryBuilder('student');
+    const [items, pageMetaDto] = await queryBuilder.paginate(pageOptionsDto);
+
+    return items.toPageDto(pageMetaDto);
   }
 
+  /**
+   * It returns a promise of a StaffEntity or null
+   * @param findData - FindOptionsWhere<StaffEntity>
+   * @returns A promise of a StaffEntity or null
+   */
   findOne(
     findData: FindOptionsWhere<StaffEntity>,
   ): Promise<StaffEntity | null> {
     return this.staffRepository.findOneBy(findData);
   }
 
-  findById(id: number) {
-    return `This action returns a #${id} staff`;
+  /**
+   * It creates a query builder, adds a where clause to it, and then executes the query
+   * @param {Uuid} id - Uuid - The id of the staff member we want to find.
+   * @returns StaffEntity
+   */
+  async findById(id: Uuid): Promise<StaffEntity> {
+    const queryBuilder = this.staffRepository
+      .createQueryBuilder('staff')
+      .where('staff.id = :id', { id });
+
+    const staffEntity = await queryBuilder.getOne();
+
+    if (!staffEntity) {
+      throw new NotFoundException();
+    }
+
+    return staffEntity;
   }
 
-  update(id: number, updateStaffDto: UpdateStaffDto) {
-    return {
-      id,
-      staff: updateStaffDto,
-    };
+  /**
+   * It updates a staff member's details
+   * @param {Uuid} id - Uuid - The id of the staff member to update
+   * @param {UpdateStaffDto} updateStaffDto - UpdateStaffDto - This is the DTO that we created earlier.
+   * @returns The staffEntity is being returned.
+   */
+  async update(id: Uuid, updateStaffDto: UpdateStaffDto): Promise<StaffEntity> {
+    const queryBuilder = this.staffRepository
+      .createQueryBuilder('staff')
+      .where('staff.id = :id', { id });
+
+    const staffEntity = await queryBuilder.getOne();
+
+    if (!staffEntity) {
+      throw new NotFoundException();
+    }
+
+    await this.staffRepository.update({ id }, updateStaffDto);
+
+    return staffEntity;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} staff`;
+  /**
+   * It removes a staff member from the database
+   * @param {Uuid} id - Uuid - The id of the staff member to be deleted
+   * @returns The staffEntity is being returned.
+   */
+  async remove(id: Uuid) {
+    const queryBuilder = this.staffRepository
+      .createQueryBuilder('staff')
+      .where('staff.id = :id', { id });
+
+    const staffEntity = await queryBuilder.getOne();
+
+    if (!staffEntity) {
+      throw new NotFoundException();
+    }
+
+    await this.staffRepository.remove(staffEntity);
+
+    return staffEntity;
   }
 
+  /**
+   * It saves the token and token expiry date to the database
+   * @param {StaffEntity} user - StaffEntity - The user entity that we want to save the token to
+   * @param {string} hash - The hashed token that will be saved in the database.
+   * @param {Date} tokenExpiry - Date,
+   * @returns The userEntity.raw is being returned.
+   */
   async saveToken(
     user: StaffEntity,
     hash: string,
@@ -81,6 +156,12 @@ export class StaffService {
     return userEntity.raw;
   }
 
+  /**
+   * It takes a user and a password, and updates the user's password
+   * @param {StaffEntity} user - StaffEntity - This is the user that we are updating.
+   * @param {string} password - string - The new password to be set
+   * @returns StaffDto
+   */
   async savePassword(user: StaffEntity, password: string): Promise<StaffDto> {
     const userEntity = await this.staffRepository.update(
       { id: user.id },
