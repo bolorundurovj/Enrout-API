@@ -3,13 +3,17 @@ import {
   Controller,
   Delete,
   Get,
-  Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
+import type { PageDto } from '../../common/dto/page.dto';
+import { PageOptionsDto } from '../../common/dto/page-options.dto';
+import { UUIDParam } from '../../decorators';
 import { CreateStudentDto } from './dto/create-student.dto';
+import type { StudentDto } from './dto/student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { StudentService } from './student.service';
 
@@ -19,27 +23,43 @@ export class StudentController {
   constructor(private readonly studentService: StudentService) {}
 
   @Post()
-  create(@Body() createStudentDto: CreateStudentDto) {
-    return this.studentService.create(createStudentDto);
+  async create(@Body() createStudentDto: CreateStudentDto) {
+    const studentEntity = await this.studentService.create(createStudentDto);
+
+    return studentEntity.toDto({ isActive: true });
   }
 
   @Get()
-  findAll() {
-    return this.studentService.findAll();
+  async findAll(
+    @Query() pageOptionsDto: PageOptionsDto,
+  ): Promise<PageDto<StudentDto>> {
+    return this.studentService.findAll(pageOptionsDto);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.studentService.findById(Number(id));
+  async findOne(@UUIDParam('id') id: Uuid): Promise<StudentDto> {
+    const studentEntity = await this.studentService.findById(id);
+
+    return studentEntity.toDto();
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateStudentDto: UpdateStudentDto) {
-    return this.studentService.update(Number(id), updateStudentDto);
+  async update(
+    @UUIDParam('id') id: Uuid,
+    @Body() updateStudentDto: UpdateStudentDto,
+  ): Promise<StudentDto> {
+    const studentEntity = await this.studentService.update(
+      id,
+      updateStudentDto,
+    );
+
+    return studentEntity.toDto();
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.studentService.remove(Number(id));
+  async remove(@UUIDParam('id') id: Uuid): Promise<StudentDto> {
+    const studentEntity = await this.studentService.remove(id);
+
+    return studentEntity.toDto();
   }
 }
