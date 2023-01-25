@@ -17,13 +17,13 @@ import { DocumentService } from '../document/document.service';
 import { CreateDocumentDto } from '../document/dto/create-document.dto';
 import type { DocumentDto } from '../document/dto/document.dto';
 import { UpdateDocumentDto } from '../document/dto/update-document.dto';
+import { ForwardDocumentDto } from '../staff/dto/forward-document.dto';
 import type { StaffEntity } from '../staff/entities/staff.entity';
 import { CreateStudentDto } from './dto/create-student.dto';
 import type { StudentDto } from './dto/student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { StudentEntity } from './entities/student.entity';
 import { StudentService } from './student.service';
-import {ForwardDocumentDto} from "../staff/dto/forward-document.dto";
 
 @Controller('students')
 @ApiTags('Students')
