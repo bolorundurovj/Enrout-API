@@ -1,29 +1,22 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Patch,
-  Post,
-  Query,
-} from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import {Body, Controller, Delete, Get, Patch, Post, Query,} from '@nestjs/common';
+import {ApiTags} from '@nestjs/swagger';
 
-import type { PageDto } from '../../common/dto/page.dto';
-import { PageOptionsDto } from '../../common/dto/page-options.dto';
-import { RoleType } from '../../constants';
-import { Auth, AuthUser, UUIDParam } from '../../decorators';
-import { DocumentService } from '../document/document.service';
-import { CreateDocumentDto } from '../document/dto/create-document.dto';
-import type { DocumentDto } from '../document/dto/document.dto';
-import { UpdateDocumentDto } from '../document/dto/update-document.dto';
-import { ForwardDocumentDto } from '../staff/dto/forward-document.dto';
-import type { StaffEntity } from '../staff/entities/staff.entity';
-import { CreateStudentDto } from './dto/create-student.dto';
-import type { StudentDto } from './dto/student.dto';
-import { UpdateStudentDto } from './dto/update-student.dto';
-import type { StudentEntity } from './entities/student.entity';
-import { StudentService } from './student.service';
+import type {PageDto} from '../../common/dto/page.dto';
+import {PageOptionsDto} from '../../common/dto/page-options.dto';
+import {RoleType} from '../../constants';
+import {Auth, AuthUser, UUIDParam} from '../../decorators';
+import {MailService} from '../../mail/mail.service';
+import {DocumentService} from '../document/document.service';
+import {CreateDocumentDto} from '../document/dto/create-document.dto';
+import type {DocumentDto} from '../document/dto/document.dto';
+import {UpdateDocumentDto} from '../document/dto/update-document.dto';
+import type {StaffEntity} from '../staff/entities/staff.entity';
+import {StaffService} from '../staff/staff.service';
+import {CreateStudentDto} from './dto/create-student.dto';
+import type {StudentDto} from './dto/student.dto';
+import {UpdateStudentDto} from './dto/update-student.dto';
+import type {StudentEntity} from './entities/student.entity';
+import {StudentService} from './student.service';
 
 @Controller('students')
 @ApiTags('Students')
@@ -31,6 +24,8 @@ export class StudentController {
   constructor(
     private readonly studentService: StudentService,
     private readonly documentService: DocumentService,
+    private readonly mailService: MailService,
+    private readonly staffService: StaffService,
   ) {}
 
   @Post()
@@ -124,6 +119,7 @@ export class StudentController {
   }
 
   @Delete('documents/:id')
+  @Auth([RoleType.STUDENT])
   async removeDoc(
     @UUIDParam('id') id: Uuid,
     @AuthUser() user: StudentEntity | StaffEntity,
@@ -137,16 +133,51 @@ export class StudentController {
   }
 
   @Patch('documents/:id/publish')
+  @Auth([RoleType.STUDENT])
   async forwardDoc(
     @UUIDParam('id') id: Uuid,
-    @Body() body: ForwardDocumentDto,
     @AuthUser() user: StudentEntity | StaffEntity,
   ): Promise<DocumentDto> {
     const docEntity = await this.documentService.publishDocument(
       user.id,
-      body.staffId,
+      user.departmentId,
       id,
     );
+
+    const staffEntity = await this.staffService.findById(
+      docEntity.currentlyAssignedId,
+    );
+
+    await this.mailService.forwardedDocument({
+      to: staffEntity.email,
+      data: {
+        name: `${user.firstName} ${user.lastName}`,
+        docTitle: docEntity.title,
+      },
+    });
+
+    return docEntity.toDto();
+  }
+
+  @Patch('documents/:id/nudge')
+  @Auth([RoleType.STUDENT])
+  async nudgeReviewer(
+    @UUIDParam('id') id: Uuid,
+    @AuthUser() user: StudentEntity | StaffEntity,
+  ): Promise<DocumentDto> {
+    const docEntity = await this.documentService.studentFindOne(user.id, id);
+
+    const staffEntity = await this.staffService.findById(
+      docEntity.currentlyAssignedId,
+    );
+
+    await this.mailService.sendNudge({
+      to: staffEntity.email,
+      data: {
+        name: `${user.firstName} ${user.lastName}`,
+        docTitle: docEntity.title,
+      },
+    });
 
     return docEntity.toDto();
   }
