@@ -66,7 +66,7 @@ export class DocumentEntity extends AbstractEntity<DocumentDto> {
   @JoinColumn()
   owner: StudentEntity;
 
-  @OneToOne(() => StaffEntity)
+  @ManyToOne(() => StaffEntity)
   @JoinColumn()
   currentlyAssigned: StaffEntity;
 }

@@ -33,6 +33,9 @@ export class DocumentDto extends AbstractDto {
   workflowId?: string;
 
   @ApiPropertyOptional()
+  currentlyAssignedId?: string;
+
+  @ApiPropertyOptional()
   workflow?: WorkflowEntity;
 
   constructor(doc: DocumentEntity) {
@@ -45,6 +48,7 @@ export class DocumentDto extends AbstractDto {
     this.owner = doc.owner;
     this.workflow = doc.workflow;
     this.currentlyAssigned = doc.currentlyAssigned;
+    this.currentlyAssignedId = doc.currentlyAssignedId;
     this.handlers = doc.handlers;
   }
 }
