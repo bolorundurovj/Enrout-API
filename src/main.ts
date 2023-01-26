@@ -53,6 +53,7 @@ export async function bootstrap(): Promise<NestExpressApplication> {
   app.useGlobalFilters(
     new HttpExceptionFilter(reflector),
     new QueryFailedFilter(reflector),
+    // new ErrorFilter()
   );
 
   app.useGlobalInterceptors(
