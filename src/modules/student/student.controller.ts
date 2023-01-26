@@ -22,7 +22,7 @@ import type { StaffEntity } from '../staff/entities/staff.entity';
 import { CreateStudentDto } from './dto/create-student.dto';
 import type { StudentDto } from './dto/student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
-import { StudentEntity } from './entities/student.entity';
+import type { StudentEntity } from './entities/student.entity';
 import { StudentService } from './student.service';
 
 @Controller('students')
@@ -45,6 +45,15 @@ export class StudentController {
     @Query() pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<StudentDto>> {
     return this.studentService.findAll(pageOptionsDto);
+  }
+
+  @Get('documents')
+  @Auth([RoleType.STUDENT])
+  async findAllStudentDocs(
+    @Query() pageOptionsDto: PageOptionsDto,
+    @AuthUser() user: StudentEntity | StaffEntity,
+  ): Promise<PageDto<DocumentDto>> {
+    return this.documentService.findAllStudentDocs(user.id, pageOptionsDto);
   }
 
   @Get(':id')
@@ -88,15 +97,8 @@ export class StudentController {
     return docEntity.toDto();
   }
 
-  @Get('/documents')
-  async findAllDocs(
-    @Query() pageOptionsDto: PageOptionsDto,
-    @AuthUser() user: StudentEntity,
-  ): Promise<PageDto<DocumentDto>> {
-    return this.documentService.findAllStudentDocs(user.id, pageOptionsDto);
-  }
-
-  @Get('/documents/:id')
+  @Get('documents/:id')
+  @Auth([RoleType.STUDENT])
   async findOneDoc(
     @UUIDParam('id') id: Uuid,
     @AuthUser() user: StudentEntity | StaffEntity,
