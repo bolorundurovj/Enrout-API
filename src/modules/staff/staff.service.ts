@@ -6,6 +6,7 @@ import { Transactional } from 'typeorm-transactional-cls-hooked';
 
 import type { PageDto } from '../../common/dto/page.dto';
 import type { PageOptionsDto } from '../../common/dto/page-options.dto';
+import type { StaffDesignation } from '../../constants';
 import { FileNotImageException } from '../../exceptions';
 import { IFile } from '../../interfaces';
 import { AwsS3Service } from '../../shared/services/aws-s3.service';
@@ -71,6 +72,29 @@ export class StaffService {
     findData: FindOptionsWhere<StaffEntity>,
   ): Promise<StaffEntity | null> {
     return this.staffRepository.findOneBy(findData);
+  }
+
+  /**
+   * It finds a staff member by their department id and role
+   * @param {Uuid} id - Uuid - The id of the department
+   * @param {StaffDesignation} role - StaffDesignation - This is the enum that we created earlier.
+   * @returns StaffEntity
+   */
+  async findOneByDeptAndRole(
+    id: Uuid,
+    role: StaffDesignation,
+  ): Promise<StaffEntity> {
+    const staffEntity = await this.staffRepository
+      .createQueryBuilder('staff')
+      .where('staff.departmentId = :id', { id })
+      .andWhere('staff.designation = :role', { role })
+      .getOne();
+
+    if (!staffEntity) {
+      throw new NotFoundException('Staff Not Found');
+    }
+
+    return staffEntity;
   }
 
   /**
