@@ -5,7 +5,8 @@ import { Transactional } from 'typeorm-transactional-cls-hooked';
 
 import type { PageDto } from '../../common/dto/page.dto';
 import type { PageOptionsDto } from '../../common/dto/page-options.dto';
-import { DocumentState } from '../../constants';
+import { DocumentState, StaffDesignation } from '../../constants';
+import { StaffService } from '../staff/staff.service';
 import { CreateDocumentDto } from './dto/create-document.dto';
 import type { DocumentDto } from './dto/document.dto';
 import type { UpdateDocumentDto } from './dto/update-document.dto';
@@ -16,6 +17,7 @@ export class DocumentService {
   constructor(
     @InjectRepository(DocumentEntity)
     private docRepository: Repository<DocumentEntity>,
+    private staffService: StaffService,
   ) {}
 
   @Transactional()
@@ -234,7 +236,7 @@ export class DocumentService {
   ): Promise<DocumentEntity> {
     const queryBuilder = this.docRepository
       .createQueryBuilder('doc')
-      .where('doc.id = :id', { id: docId })
+      .where('doc.id = :did', { did: docId })
       .andWhere('doc.ownerId = :id', { id: studentId });
 
     const docEntity = await queryBuilder.getOne();
@@ -251,31 +253,37 @@ export class DocumentService {
   /**
    * It takes in a studentId, a staffId, and a docId, and returns a DocumentEntity
    * @param {Uuid} studentId - The id of the student who owns the document
-   * @param staffId - The id of the staff member who is assigned to the document
-   * @param Uuid - A type that represents a UUID.
+   * @param departmentId
    * @param {Uuid} docId - Uuid - the id of the document that is being published
    * @returns DocumentEntity
    */
   async publishDocument(
     studentId: Uuid,
-    staffId: Uuid,
+    departmentId: Uuid,
     docId: Uuid,
   ): Promise<DocumentEntity> {
     const queryBuilder = this.docRepository
       .createQueryBuilder('doc')
-      .where('doc.ownerId = :id', { id: studentId })
+      .where('doc.ownerId = :sid', { sid: studentId })
       .andWhere('doc.id = :id', { id: docId });
 
     const docEntity = await queryBuilder.getOne();
 
     if (!docEntity) {
-      throw new NotFoundException();
+      throw new NotFoundException('Document not found');
     }
+
+    const staffEntity = await this.staffService.findOneByDeptAndRole(
+      departmentId,
+      StaffDesignation.HOD,
+    );
 
     await this.docRepository.update(
       { id: docId },
-      { currentlyAssignedId: staffId },
+      { currentlyAssignedId: staffEntity.id, state: DocumentState.PENDING },
     );
+
+    docEntity.currentlyAssignedId = staffEntity.id;
 
     return docEntity;
   }
@@ -293,7 +301,8 @@ export class DocumentService {
     const queryBuilder = this.docRepository
       .createQueryBuilder('doc')
       .where('doc.ownerId = :id', { id })
-      .andWhere('doc.isDeleted = :bool', { bool: false });
+      .andWhere('doc.isDeleted = :bool', { bool: false })
+    ;
     const [items, pageMetaDto] = await queryBuilder.paginate(pageOptionsDto);
 
     return items.toPageDto(pageMetaDto);
