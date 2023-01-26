@@ -301,8 +301,7 @@ export class DocumentService {
     const queryBuilder = this.docRepository
       .createQueryBuilder('doc')
       .where('doc.ownerId = :id', { id })
-      .andWhere('doc.isDeleted = :bool', { bool: false })
-    ;
+      .andWhere('doc.isDeleted = :bool', { bool: false });
     const [items, pageMetaDto] = await queryBuilder.paginate(pageOptionsDto);
 
     return items.toPageDto(pageMetaDto);

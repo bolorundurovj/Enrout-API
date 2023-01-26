@@ -3,10 +3,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { MailModule } from '../../mail/mail.module';
 import { DocumentModule } from '../document/document.module';
+import { StaffModule } from '../staff/staff.module';
 import { StudentEntity } from './entities/student.entity';
 import { StudentController } from './student.controller';
 import { StudentService } from './student.service';
-import {StaffModule} from "../staff/staff.module";
 
 @Module({
   imports: [

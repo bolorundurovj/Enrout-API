@@ -11,7 +11,8 @@ import { ApiTags } from '@nestjs/swagger';
 
 import type { PageDto } from '../../common/dto/page.dto';
 import { PageOptionsDto } from '../../common/dto/page-options.dto';
-import {Auth, AuthUser, UUIDParam} from '../../decorators';
+import { RoleType } from '../../constants';
+import { Auth, AuthUser, UUIDParam } from '../../decorators';
 import { DocumentService } from '../document/document.service';
 import type { DocumentDto } from '../document/dto/document.dto';
 import { UpdateDocumentDto } from '../document/dto/update-document.dto';
@@ -22,7 +23,6 @@ import type { StaffDto } from './dto/staff.dto';
 import { UpdateStaffDto } from './dto/update-staff.dto';
 import type { StaffEntity } from './entities/staff.entity';
 import { StaffService } from './staff.service';
-import {RoleType} from "../../constants";
 
 @Controller('staff')
 @ApiTags('Staff')

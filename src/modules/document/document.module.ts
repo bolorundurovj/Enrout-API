@@ -9,7 +9,7 @@ import { DocumentEntity } from './entities/document.entity';
 @Module({
   imports: [
     TypeOrmModule.forFeature([DocumentEntity]),
-    forwardRef(() => StaffModule)
+    forwardRef(() => StaffModule),
   ],
   controllers: [DocumentController],
   providers: [DocumentService],
