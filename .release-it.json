@@ -1,12 +1,14 @@
 {
   "git": {
-    "commitMessage": "release(): release v${version}",
-    "changelog": "npx auto-changelog --stdout --commit-limit false -u --template ./templates/changelog-template.hbs"
+    "commitMessage": "chore: release v${version}"
   },
   "github": {
     "release": true
   },
-  "hooks": {
-    "after:bump": "npx auto-changelog -p --template ./templates/changelog-template.hbs"
+  "plugins": {
+    "@release-it/conventional-changelog": {
+      "preset": "angular",
+      "infile": "CHANGELOG.md"
+    }
   }
 }
