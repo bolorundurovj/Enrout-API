@@ -292,8 +292,8 @@ export class DocumentService {
   ): Promise<PageDto<DocumentDto>> {
     const queryBuilder = this.docRepository
       .createQueryBuilder('doc')
-      .where('doc.id = :id', { id })
-      .where('doc.isDeleted = :bool', { bool: false });
+      .where('doc.ownerId = :id', { id })
+      .andWhere('doc.isDeleted = :bool', { bool: false });
     const [items, pageMetaDto] = await queryBuilder.paginate(pageOptionsDto);
 
     return items.toPageDto(pageMetaDto);
@@ -312,7 +312,7 @@ export class DocumentService {
     const queryBuilder = this.docRepository
       .createQueryBuilder('doc')
       .where('doc.currentlyAssigned = :id', { id })
-      .where('doc.isDeleted = :bool', { bool: false });
+      .andWhere('doc.isDeleted = :bool', { bool: false });
     const [items, pageMetaDto] = await queryBuilder.paginate(pageOptionsDto);
 
     return items.toPageDto(pageMetaDto);
@@ -384,11 +384,11 @@ export class DocumentService {
    * @param {Uuid} id - Uuid - This is the id of the document you want to retrieve.
    * @returns A document entity
    */
-  async studentFindOne(studentId: Uuid, id: Uuid): Promise<DocumentEntity> {
+  async studentFindOne(studentId: Uuid, docId: Uuid): Promise<DocumentEntity> {
     const queryBuilder = this.docRepository
       .createQueryBuilder('doc')
-      .where('doc.id = :id', { id })
-      .andWhere('doc.ownerId = :id', { id: studentId })
+      .where('doc.id = :id', { id: docId })
+      .andWhere('doc.ownerId = :oid', { oid: studentId })
       .leftJoin('doc.owner', 'owner')
       .addSelect([
         'owner.id',
@@ -428,7 +428,7 @@ export class DocumentService {
     const queryBuilder = this.docRepository
       .createQueryBuilder('doc')
       .where('doc.id = :id', { id })
-      .andWhere('doc.currentlyAssignedId = :id', { id: staffId })
+      .andWhere('doc.currentlyAssignedId = :sid', { sid: staffId })
       .leftJoin('doc.owner', 'owner')
       .addSelect([
         'owner.id',
