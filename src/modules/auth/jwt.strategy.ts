@@ -8,7 +8,7 @@ import type { StaffEntity } from '../staff/entities/staff.entity';
 import { StaffService } from '../staff/staff.service';
 import type { StudentEntity } from '../student/entities/student.entity';
 import { StudentService } from '../student/student.service';
-import type { UserEntity } from '../user/user.entity';
+import { UserEntity } from '../user/user.entity';
 import { UserService } from '../user/user.service';
 
 @Injectable()
@@ -56,13 +56,20 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException();
     }
 
-    return {
+    const unifiedUser: IUnifiedUser = {
       id: user.id,
       role: args.role,
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
-    } as IUnifiedUser;
+    };
+
+    // @ts-ignore
+    if (!(user instanceof UserEntity)) {
+      unifiedUser.departmentId = user.departmentId;
+    }
+
+    return unifiedUser;
   }
 }
 
@@ -72,4 +79,5 @@ export interface IUnifiedUser {
   firstName: string;
   lastName: string;
   email: string;
+  departmentId?: string;
 }
