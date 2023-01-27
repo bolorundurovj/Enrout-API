@@ -3,4 +3,5 @@ export enum DocumentState {
   PENDING = 'pending',
   APPROVED = 'approved',
   REJECTED = 'rejected',
+  CHANGE_REQUESTED = 'change-requested',
 }
