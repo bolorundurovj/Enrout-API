@@ -81,6 +81,42 @@ export class MailService {
     });
   }
 
+  /**
+   * It sends an email to the user with the title of the document that needs their attention.
+   * @param mailData - IMailData<{ docTitle: string }>
+   */
+  async changeRequestedMail(mailData: IMailData<{ docTitle: string }>) {
+    await this.mailerService.sendMail({
+      to: mailData.to,
+      subject: 'Change Requested',
+      template: 'changes-requested',
+      context: {
+        title: 'A Document Needs Your Attention',
+        actionTitle: 'View Now',
+        app_name: this.configService.get('app.name'),
+        text1: `${mailData.data.docTitle}`,
+      },
+    });
+  }
+
+  /**
+   * It sends an email to the user with the email address in the `to` field of the `mailData` object
+   * @param mailData - IMailData<{ docTitle: string }>
+   */
+  async docRejectedMail(mailData: IMailData<{ docTitle: string }>) {
+    await this.mailerService.sendMail({
+      to: mailData.to,
+      subject: 'Submission Rejected',
+      template: 'rejected-document',
+      context: {
+        title: 'A Document Needs Your Attention',
+        actionTitle: 'View Now',
+        app_name: this.configService.get('app.name'),
+        text1: `${mailData.data.docTitle}`,
+      },
+    });
+  }
+
   // async userSignUp(mailData: IMailData<{ hash: string }>) {
   //   await this.mailerService.sendMail({
   //     to: mailData.to,
