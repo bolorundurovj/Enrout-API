@@ -6,6 +6,10 @@ import { Transactional } from 'typeorm-transactional-cls-hooked';
 import type { PageDto } from '../../common/dto/page.dto';
 import type { PageOptionsDto } from '../../common/dto/page-options.dto';
 import { DocumentState, StaffDesignation } from '../../constants';
+import { FileNotPdfException } from '../../exceptions';
+import type { IFile } from '../../interfaces';
+import { AwsS3Service } from '../../shared/services/aws-s3.service';
+import { ValidatorService } from '../../shared/services/validator.service';
 import { StaffService } from '../staff/staff.service';
 import { CreateDocumentDto } from './dto/create-document.dto';
 import type { DocumentDto } from './dto/document.dto';
@@ -18,6 +22,8 @@ export class DocumentService {
     @InjectRepository(DocumentEntity)
     private docRepository: Repository<DocumentEntity>,
     private staffService: StaffService,
+    private validatorService: ValidatorService,
+    private awsS3Service: AwsS3Service,
   ) {}
 
   @Transactional()
@@ -159,15 +165,84 @@ export class DocumentService {
   }
 
   /**
-   * "Reject a document by a user."
-   *
-   * The first thing we do is create a query builder. This is a special object that allows us to build a query to the
-   * database. We use it to find the document that we want to reject
-   * @param {Uuid} userId - Uuid - the user id of the user who is rejecting the document
-   * @param {Uuid} docId - Uuid - The id of the document to be rejected
+   * It rejects a document by updating its state to REJECTED and adding a reviewer comment
+   * @param {Uuid} userId - Uuid - The user id of the user who is rejecting the document
+   * @param {Uuid} docId - The id of the document to be rejected.
+   * @param {string} comment - string - the comment that the reviewer will add to the document
    * @returns DocumentEntity
    */
-  async rejectDocument(userId: Uuid, docId: Uuid): Promise<DocumentEntity> {
+  async rejectDocument(
+    userId: Uuid,
+    docId: Uuid,
+    comment: string,
+  ): Promise<DocumentEntity> {
+    const queryBuilder = this.docRepository
+      .createQueryBuilder('doc')
+      .where('doc.id = :did', { did: docId })
+      .andWhere('doc.currentlyAssigned = :id', { id: userId });
+
+    const docEntity = await queryBuilder.getOne();
+
+    if (!docEntity) {
+      throw new NotFoundException();
+    }
+
+    await this.docRepository.update(
+      { id: docId },
+      { state: DocumentState.REJECTED, reviewerComment: comment },
+    );
+
+    return docEntity;
+  }
+
+  /**
+   * "Update the document with the given ID to have the state CHANGE_REQUESTED and the given comment."
+   *
+   * The first thing we do is create a query builder. This is a tool that allows us to build a query to the database. We
+   * use it to find the document with the given ID and that is currently assigned to the given user
+   * @param {Uuid} userId - The id of the user who is requesting changes.
+   * @param {Uuid} docId - The id of the document that the user wants to request changes on.
+   * @param {string} comment - string - The comment that the reviewer has left for the author.
+   * @returns DocumentEntity
+   */
+  async requestChangesOnDocument(
+    userId: Uuid,
+    docId: Uuid,
+    comment: string,
+  ): Promise<DocumentEntity> {
+    const queryBuilder = this.docRepository
+      .createQueryBuilder('doc')
+      .where('doc.id = :did', { did: docId })
+      .andWhere('doc.currentlyAssigned = :id', { id: userId });
+
+    const docEntity = await queryBuilder.getOne();
+
+    if (!docEntity) {
+      throw new NotFoundException();
+    }
+
+    await this.docRepository.update(
+      { id: docId },
+      { state: DocumentState.CHANGE_REQUESTED, reviewerComment: comment },
+    );
+
+    return docEntity;
+  }
+
+  /**
+   * It updates the currentlyAssignedId field of a document with the given id to the given staffId
+   * @param {Uuid} userId - The id of the user who is forwarding the document
+   * @param {Uuid} staffId - The id of the staff member to whom the document is being forwarded.
+   * @param {Uuid} docId - The id of the document to be forwarded
+   * @param {IFile} [file] - IFile - this is the file that is being uploaded.
+   * @returns DocumentEntity
+   */
+  async forwardDocument(
+    userId: Uuid,
+    staffId: Uuid,
+    docId: Uuid,
+    file?: IFile,
+  ): Promise<DocumentEntity> {
     const queryBuilder = this.docRepository
       .createQueryBuilder('doc')
       .where('doc.id = :id', { id: docId })
@@ -179,41 +254,12 @@ export class DocumentService {
       throw new NotFoundException();
     }
 
-    await this.docRepository.update(
-      { id: docId },
-      { state: DocumentState.REJECTED },
-    );
+    if (file && !this.validatorService.isPDF(file.mimetype)) {
+      throw new FileNotPdfException();
+    }
 
-    return docEntity;
-  }
-
-  /**
-   * "Forward a document to another staff member."
-   *
-   * The function takes in three parameters:
-   *
-   * - userId: The ID of the user who is forwarding the document.
-   * - staffId: The ID of the staff member to whom the document is being forwarded.
-   * - docId: The ID of the document being forwarded
-   * @param {Uuid} userId - The id of the user who is forwarding the document
-   * @param {Uuid} staffId - The id of the staff member to whom the document is being forwarded.
-   * @param {Uuid} docId - The id of the document to be forwarded
-   * @returns DocumentEntity
-   */
-  async forwardDocument(
-    userId: Uuid,
-    staffId: Uuid,
-    docId: Uuid,
-  ): Promise<DocumentEntity> {
-    const queryBuilder = this.docRepository
-      .createQueryBuilder('doc')
-      .where('doc.id = :id', { id: docId })
-      .andWhere('doc.currentlyAssigned = :id', { id: userId });
-
-    const docEntity = await queryBuilder.getOne();
-
-    if (!docEntity) {
-      throw new NotFoundException();
+    if (file) {
+      docEntity.reviewerAttachment = await this.awsS3Service.uploadImage(file);
     }
 
     await this.docRepository.update(

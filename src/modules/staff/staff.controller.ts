@@ -1,28 +1,25 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Patch,
-  Post,
-  Query,
-} from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import {Body, Controller, Delete, Get, Patch, Post, Query, UploadedFile,} from '@nestjs/common';
+import {ApiTags} from '@nestjs/swagger';
 
-import type { PageDto } from '../../common/dto/page.dto';
-import { PageOptionsDto } from '../../common/dto/page-options.dto';
-import { RoleType } from '../../constants';
-import { Auth, AuthUser, UUIDParam } from '../../decorators';
-import { DocumentService } from '../document/document.service';
-import type { DocumentDto } from '../document/dto/document.dto';
-import { UpdateDocumentDto } from '../document/dto/update-document.dto';
-import { StudentEntity } from '../student/entities/student.entity';
-import { CreateStaffDto } from './dto/create-staff.dto';
-import { ForwardDocumentDto } from './dto/forward-document.dto';
-import type { StaffDto } from './dto/staff.dto';
-import { UpdateStaffDto } from './dto/update-staff.dto';
-import type { StaffEntity } from './entities/staff.entity';
-import { StaffService } from './staff.service';
+import type {PageDto} from '../../common/dto/page.dto';
+import {PageOptionsDto} from '../../common/dto/page-options.dto';
+import {RoleType} from '../../constants';
+import {ApiFile, Auth, AuthUser, UUIDParam} from '../../decorators';
+import {IFile} from '../../interfaces';
+import {MailService} from '../../mail/mail.service';
+import {DocumentService} from '../document/document.service';
+import type {DocumentDto} from '../document/dto/document.dto';
+import {RejectDocumentDto} from '../document/dto/reject-document.dto';
+import {RequestChangesDto} from '../document/dto/rquest-changes.dto';
+import {UpdateDocumentDto} from '../document/dto/update-document.dto';
+import {StudentEntity} from '../student/entities/student.entity';
+import {StudentService} from '../student/student.service';
+import {CreateStaffDto} from './dto/create-staff.dto';
+import {ForwardDocumentDto} from './dto/forward-document.dto';
+import type {StaffDto} from './dto/staff.dto';
+import {UpdateStaffDto} from './dto/update-staff.dto';
+import type {StaffEntity} from './entities/staff.entity';
+import {StaffService} from './staff.service';
 
 @Controller('staff')
 @ApiTags('Staff')
@@ -30,6 +27,8 @@ export class StaffController {
   constructor(
     private readonly staffService: StaffService,
     private readonly documentService: DocumentService,
+    private readonly mailService: MailService,
+    private readonly studentService: StudentService,
   ) {}
 
   @Post()
@@ -80,6 +79,7 @@ export class StaffController {
   }
 
   @Get('/documents/:id')
+  @Auth([RoleType.STAFF])
   async findOneDoc(
     @UUIDParam('id') id: Uuid,
     @AuthUser() user: StudentEntity | StaffEntity,
@@ -104,27 +104,71 @@ export class StaffController {
     return docEntity.toDto();
   }
 
-  @Patch('documents/:id/forward')
+  @Patch('documents/:id/approve')
+  @ApiFile({ name: 'document' })
+  @Auth([RoleType.STAFF])
   async forwardDoc(
     @UUIDParam('id') id: Uuid,
     @Body() body: ForwardDocumentDto,
     @AuthUser() user: StudentEntity | StaffEntity,
+    @UploadedFile() file?: IFile,
   ): Promise<DocumentDto> {
     const docEntity = await this.documentService.forwardDocument(
       user.id,
-      body.staffId,
+      user.id,
       id,
+      file,
     );
 
     return docEntity.toDto();
   }
 
   @Patch('documents/:id/reject')
+  @Auth([RoleType.STAFF])
   async rejectDoc(
     @UUIDParam('id') id: Uuid,
     @AuthUser() user: StudentEntity | StaffEntity,
+    @Body() body: RejectDocumentDto,
   ): Promise<DocumentDto> {
-    const docEntity = await this.documentService.rejectDocument(user.id, id);
+    const docEntity = await this.documentService.rejectDocument(
+      user.id,
+      id,
+      body.comment,
+    );
+
+    const studentEntity = await this.studentService.findById(docEntity.ownerId);
+
+    await this.mailService.docRejectedMail({
+      to: studentEntity.email,
+      data: {
+        docTitle: docEntity.title,
+      },
+    });
+
+    return docEntity.toDto();
+  }
+
+  @Patch('documents/:id/request-changes')
+  @Auth([RoleType.STAFF])
+  async requestChangesOnDoc(
+    @UUIDParam('id') id: Uuid,
+    @AuthUser() user: StudentEntity | StaffEntity,
+    @Body() body: RequestChangesDto,
+  ): Promise<DocumentDto> {
+    const docEntity = await this.documentService.requestChangesOnDocument(
+      user.id,
+      id,
+      body.comment,
+    );
+
+    const studentEntity = await this.studentService.findById(docEntity.ownerId);
+
+    await this.mailService.changeRequestedMail({
+      to: studentEntity.email,
+      data: {
+        docTitle: docEntity.title,
+      },
+    });
 
     return docEntity.toDto();
   }
