@@ -55,6 +55,12 @@ export class DocumentEntity extends AbstractEntity<DocumentDto> {
   @Column({ nullable: true })
   attachment: string;
 
+  @Column({ nullable: true })
+  reviewerComment: string;
+
+  @Column({ nullable: true })
+  reviewerAttachment: string;
+
   @Column({ default: false })
   isDeleted: boolean;
 

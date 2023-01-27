@@ -38,6 +38,12 @@ export class DocumentDto extends AbstractDto {
   @ApiPropertyOptional()
   workflow?: WorkflowEntity;
 
+  @ApiPropertyOptional()
+  reviewerAttachment?: string;
+
+  @ApiPropertyOptional()
+  reviewerComment?: string;
+
   constructor(doc: DocumentEntity) {
     super(doc);
     this.id = doc.id;
@@ -50,5 +56,7 @@ export class DocumentDto extends AbstractDto {
     this.currentlyAssigned = doc.currentlyAssigned;
     this.currentlyAssignedId = doc.currentlyAssignedId;
     this.handlers = doc.handlers;
+    this.reviewerAttachment = doc.reviewerAttachment;
+    this.reviewerComment = doc.reviewerComment;
   }
 }
