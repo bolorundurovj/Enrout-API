@@ -2,9 +2,10 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
+import type { StaffDesignation } from '../../constants';
 import { RoleType, TokenType } from '../../constants';
 import { ApiConfigService } from '../../shared/services/api-config.service';
-import type { StaffEntity } from '../staff/entities/staff.entity';
+import { StaffEntity } from '../staff/entities/staff.entity';
 import { StaffService } from '../staff/staff.service';
 import type { StudentEntity } from '../student/entities/student.entity';
 import { StudentService } from '../student/student.service';
@@ -64,9 +65,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       email: user.email,
     };
 
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     if (!(user instanceof UserEntity)) {
       unifiedUser.departmentId = user.departmentId;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    if (user.designation && user instanceof StaffEntity) {
+      unifiedUser.designation = user.designation;
     }
 
     return unifiedUser;
@@ -74,8 +82,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 }
 
 export interface IUnifiedUser {
-  id: string;
+  id: Uuid;
   role: RoleType;
+  designation?: StaffDesignation;
   firstName: string;
   lastName: string;
   email: string;
