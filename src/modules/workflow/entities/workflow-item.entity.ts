@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
 import type { IAbstractEntity } from '../../../common/abstract.entity';
 import { AbstractEntity } from '../../../common/abstract.entity';
@@ -8,7 +8,7 @@ import type { WorkflowItemDtoOptions } from '../dto/workflow-item.dto';
 import { WorkflowItemDto } from '../dto/workflow-item.dto';
 import { WorkflowEntity } from './workflow.entity';
 
-export interface IWorkflowEntity extends IAbstractEntity<WorkflowItemDto> {
+export interface IWorkflowItemEntity extends IAbstractEntity<WorkflowItemDto> {
   name: string;
   position: number;
 }
@@ -17,12 +17,12 @@ export interface IWorkflowEntity extends IAbstractEntity<WorkflowItemDto> {
 @UseDto(WorkflowItemDto)
 export class WorkflowItemEntity
   extends AbstractEntity<WorkflowItemDto, WorkflowItemDtoOptions>
-  implements IWorkflowEntity
+  implements IWorkflowItemEntity
 {
   @Column({ nullable: false })
   name: string;
 
-  @Column({ nullable: false })
+  @Column({ nullable: false, type: 'int', generated: 'increment' })
   position: number;
 
   @Column({ type: 'uuid', nullable: false })
@@ -31,7 +31,7 @@ export class WorkflowItemEntity
   @Column({ type: 'uuid', nullable: false })
   groupRoleId: Uuid;
 
-  @OneToOne(() => GroupRoleEntity)
+  @ManyToOne(() => GroupRoleEntity)
   @JoinColumn({ name: 'group_role_id' })
   groupRole: GroupRoleEntity;
 
