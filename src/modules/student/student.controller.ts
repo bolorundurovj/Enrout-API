@@ -17,7 +17,7 @@ import { MailService } from '../../mail/mail.service';
 import { DocumentService } from '../document/document.service';
 import { CreateDocumentDto } from '../document/dto/create-document.dto';
 import type { DocumentDto } from '../document/dto/document.dto';
-import { UpdateDocumentDto } from '../document/dto/update-document.dto';
+import { StudentUpdateDocumentDto } from '../document/dto/student-update-document.dto';
 import type { StaffEntity } from '../staff/entities/staff.entity';
 import { StaffService } from '../staff/staff.service';
 import { CreateStudentDto } from './dto/create-student.dto';
@@ -112,9 +112,10 @@ export class StudentController {
   }
 
   @Patch('documents/:id')
+  @Auth([RoleType.STUDENT])
   async updateDOc(
     @UUIDParam('id') id: Uuid,
-    @Body() updateDocumentDto: UpdateDocumentDto,
+    @Body() updateDocumentDto: StudentUpdateDocumentDto,
     @AuthUser() user: StudentEntity | StaffEntity,
   ): Promise<DocumentDto> {
     const docEntity = await this.documentService.studentUpdateDoc(
@@ -183,6 +184,33 @@ export class StudentController {
       to: staffEntity.email,
       data: {
         name: `${user.firstName} ${user.lastName}`,
+        docTitle: docEntity.title,
+      },
+    });
+
+    return docEntity.toDto();
+  }
+
+  @Patch('documents/:id/resolve')
+  @Auth([RoleType.STUDENT])
+  async resolveDocument(
+    @UUIDParam('id') id: Uuid,
+    @Body() updateDocumentDto: StudentUpdateDocumentDto,
+    @AuthUser() user: StudentEntity | StaffEntity,
+  ): Promise<DocumentDto> {
+    const docEntity = await this.documentService.studentResolveDoc(
+      user.id,
+      id,
+      updateDocumentDto,
+    );
+
+    const staffEntity = await this.staffService.findById(
+      docEntity.currentlyAssignedId,
+    );
+
+    await this.mailService.returnedDocMail({
+      to: staffEntity.email,
+      data: {
         docTitle: docEntity.title,
       },
     });

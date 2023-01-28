@@ -117,6 +117,25 @@ export class MailService {
     });
   }
 
+  /**
+   * This function sends an email to the user who created the document, notifying them that the document has been returned
+   * to them
+   * @param mailData - IMailData<{ docTitle: string }>
+   */
+  async returnedDocMail(mailData: IMailData<{ docTitle: string }>) {
+    await this.mailerService.sendMail({
+      to: mailData.to,
+      subject: 'Document Updated',
+      template: 'returned-document',
+      context: {
+        title: 'A Document Needs Your Attention',
+        actionTitle: 'View Now',
+        app_name: this.configService.get('app.name'),
+        text1: `${mailData.data.docTitle}`,
+      },
+    });
+  }
+
   // async userSignUp(mailData: IMailData<{ hash: string }>) {
   //   await this.mailerService.sendMail({
   //     to: mailData.to,

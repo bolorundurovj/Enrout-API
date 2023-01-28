@@ -432,6 +432,37 @@ export class DocumentService {
   }
 
   /**
+   * It updates the document with the given id, owned by the student with the given id, with the given data
+   * @param {Uuid} studentId - Uuid - The student's ID
+   * @param {Uuid} docId - Uuid,
+   * @param {UpdateDocumentDto} updateDocumentDto - UpdateDocumentDto
+   * @returns The updated document entity
+   */
+  async studentResolveDoc(
+    studentId: Uuid,
+    docId: Uuid,
+    updateDocumentDto: UpdateDocumentDto,
+  ): Promise<DocumentEntity> {
+    const queryBuilder = this.docRepository
+      .createQueryBuilder('doc')
+      .where('doc.ownerId = :sid', { sid: studentId })
+      .andWhere('doc.id = :id', { id: docId });
+
+    const docEntity = await queryBuilder.getOne();
+
+    if (!docEntity) {
+      throw new NotFoundException();
+    }
+
+    await this.docRepository.update(
+      { id: docId },
+      { ...updateDocumentDto, state: DocumentState.PENDING },
+    );
+
+    return docEntity;
+  }
+
+  /**
    * It returns a document entity with the specified id, owned by the specified student, with the owner, currently assigned
    * and workflow details
    * @param {Uuid} studentId - Uuid - This is the id of the student who owns the document.
