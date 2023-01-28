@@ -12,6 +12,12 @@ export class WorkflowItemDto extends AbstractDto {
   @ApiProperty()
   position: number;
 
+  @ApiProperty()
+  workflowId: string;
+
+  @ApiProperty()
+  groupRoleId: string;
+
   @ApiPropertyOptional()
   isActive?: boolean;
 
@@ -19,6 +25,8 @@ export class WorkflowItemDto extends AbstractDto {
     super(workflow);
     this.name = workflow.name;
     this.position = workflow.position;
+    this.workflowId = workflow.workflowId;
+    this.groupRoleId = workflow.groupRoleId;
     this.isActive = options?.isActive;
   }
 }

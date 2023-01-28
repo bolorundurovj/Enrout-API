@@ -13,8 +13,10 @@ import type { PageDto } from '../../common/dto/page.dto';
 import { PageOptionsDto } from '../../common/dto/page-options.dto';
 import { UUIDParam } from '../../decorators';
 import { CreateWorkflowDto } from './dto/create-workflow.dto';
+import { CreateWorkflowItemDto } from './dto/create-workflow-item.dto';
 import { UpdateWorkflowDto } from './dto/update-workflow.dto';
 import type { WorkflowDto } from './dto/workflow.dto';
+import type { WorkflowItemDto } from './dto/workflow-item.dto';
 import { WorkflowService } from './workflow.service';
 
 @Controller('workflows')
@@ -29,6 +31,19 @@ export class WorkflowController {
     return workflowEntity.toDto();
   }
 
+  @Post(':id/items')
+  async createWorkflowItem(
+    @UUIDParam('id') id: Uuid,
+    @Body() createWorkflowItemDto: CreateWorkflowItemDto,
+  ) {
+    const workflowItemEntity = await this.workflowService.createWorkflowItem(
+      id,
+      createWorkflowItemDto,
+    );
+
+    return workflowItemEntity.toDto();
+  }
+
   @Get()
   async findAll(
     @Query() pageOptionsDto: PageOptionsDto,
@@ -38,9 +53,7 @@ export class WorkflowController {
 
   @Get(':id')
   async findOne(@UUIDParam('id') id: Uuid): Promise<WorkflowDto> {
-    const workflowEntity = await this.workflowService.findOne(id);
-
-    return workflowEntity.toDto();
+    return this.workflowService.findOne(id);
   }
 
   @Patch(':id')
@@ -61,5 +74,14 @@ export class WorkflowController {
     const workflowEntity = await this.workflowService.remove(id);
 
     return workflowEntity.toDto();
+  }
+
+  @Delete(':id/items')
+  async removeItem(@UUIDParam('id') id: Uuid): Promise<WorkflowItemDto> {
+    const workflowItemEntity = await this.workflowService.removeWorkflowItem(
+      id,
+    );
+
+    return workflowItemEntity.toDto();
   }
 }
