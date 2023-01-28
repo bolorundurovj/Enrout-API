@@ -11,6 +11,7 @@ import type { IFile } from '../../interfaces';
 import { AwsS3Service } from '../../shared/services/aws-s3.service';
 import { ValidatorService } from '../../shared/services/validator.service';
 import { StaffService } from '../staff/staff.service';
+import { WorkflowService } from '../workflow/workflow.service';
 import { CreateDocumentDto } from './dto/create-document.dto';
 import type { DocumentDto } from './dto/document.dto';
 import type { UpdateDocumentDto } from './dto/update-document.dto';
@@ -22,6 +23,7 @@ export class DocumentService {
     @InjectRepository(DocumentEntity)
     private docRepository: Repository<DocumentEntity>,
     private staffService: StaffService,
+    private workflowService: WorkflowService,
     private validatorService: ValidatorService,
     private awsS3Service: AwsS3Service,
   ) {}
@@ -230,22 +232,26 @@ export class DocumentService {
   }
 
   /**
-   * It updates the currentlyAssignedId field of a document with the given id to the given staffId
-   * @param {Uuid} userId - The id of the user who is forwarding the document
-   * @param {Uuid} staffId - The id of the staff member to whom the document is being forwarded.
-   * @param {Uuid} docId - The id of the document to be forwarded
-   * @param {IFile} [file] - IFile - this is the file that is being uploaded.
+   * It forwards a document to the next person in the workflow
+   * @param {Uuid} userId - The id of the user who is forwarding the document.
+   * @param {Uuid} deptId - The department id of the user who is forwarding the document.
+   * @param {StaffDesignation} designation - StaffDesignation,
+   * @param {Uuid} docId - The id of the document to be forwarded.
+   * @param {string} [comment] - The comment that the reviewer has made.
+   * @param {IFile} [file] - IFile - This is the file that the user uploads.
    * @returns DocumentEntity
    */
   async forwardDocument(
     userId: Uuid,
-    staffId: Uuid,
+    deptId: Uuid,
+    designation: StaffDesignation,
     docId: Uuid,
+    comment?: string,
     file?: IFile,
   ): Promise<DocumentEntity> {
     const queryBuilder = this.docRepository
       .createQueryBuilder('doc')
-      .where('doc.id = :id', { id: docId })
+      .where('doc.id = :did', { did: docId })
       .andWhere('doc.currentlyAssigned = :id', { id: userId });
 
     const docEntity = await queryBuilder.getOne();
@@ -262,10 +268,36 @@ export class DocumentService {
       docEntity.reviewerAttachment = await this.awsS3Service.uploadImage(file);
     }
 
-    await this.docRepository.update(
-      { id: docId },
-      { currentlyAssignedId: staffId },
+    const workflow = await this.workflowService.findOne(docEntity.workflowId);
+
+    const currentIdx = workflow.workflowItems.findIndex(
+      (x) => x.groupRole.designation === designation,
     );
+
+    if (currentIdx < --workflow.workflowItems.length) {
+      const staffEntity = await this.staffService.findOneByDeptAndRole(
+        deptId,
+        workflow.workflowItems[currentIdx + 1].groupRole.designation,
+      );
+      await this.docRepository.update(
+        { id: docId },
+        {
+          currentlyAssignedId: staffEntity.id,
+          reviewerComment: comment,
+          reviewerAttachment: docEntity.reviewerAttachment,
+        },
+      );
+    } else {
+      await this.docRepository.update(
+        { id: docId },
+        {
+          reviewerComment: comment,
+          reviewerAttachment: docEntity.reviewerAttachment,
+          state: DocumentState.APPROVED,
+        },
+      );
+      docEntity.state = DocumentState.APPROVED;
+    }
 
     return docEntity;
   }
@@ -538,6 +570,42 @@ export class DocumentService {
     if (!docEntity) {
       throw new NotFoundException();
     }
+
+    return docEntity;
+  }
+
+  /**
+   * "Update the workflowId of the document with the given id, but only if the document is currently assigned to the user
+   * with the given id."
+   *
+   * The first thing we do is create a query builder. This is a special object that allows us to build up a query that we
+   * can then execute. We use the query builder to find the document with the given id, and that is currently assigned to
+   * the user with the given id
+   * @param {Uuid} userId - The userId of the user who is currently assigned to the document.
+   * @param {Uuid} docId - The id of the document you want to update
+   * @param {string} workflowId - The id of the workflow to set the document to.
+   * @returns The document entity that was updated.
+   */
+  async setDocumentWorkflow(
+    userId: Uuid,
+    docId: Uuid,
+    workflowId: string,
+  ): Promise<DocumentEntity> {
+    const queryBuilder = this.docRepository
+      .createQueryBuilder('doc')
+      .where('doc.id = :did', { did: docId })
+      .andWhere('doc.currentlyAssigned = :id', { id: userId });
+
+    const docEntity = await queryBuilder.getOne();
+
+    if (!docEntity) {
+      throw new NotFoundException();
+    }
+
+    await this.docRepository.update(
+      { id: docId },
+      { workflowId, reviewerComment: '', reviewerAttachment: '' },
+    );
 
     return docEntity;
   }
