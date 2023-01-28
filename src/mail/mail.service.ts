@@ -70,13 +70,13 @@ export class MailService {
     await this.mailerService.sendMail({
       to: mailData.to,
       subject: 'Document Review Pending',
-      template: 'assignment',
+      template: 'nudge',
       context: {
         title: 'A Document Is Still Awaiting Your Review',
         actionTitle: 'A Document Needs Your Review',
         app_name: this.configService.get('app.name'),
-        text1: `${mailData.data.name}`,
-        text2: `${mailData.data.docTitle}`,
+        text1: `${mailData.data.docTitle}`,
+        text2: `${mailData.data.name}`,
       },
     });
   }
@@ -132,6 +132,23 @@ export class MailService {
         actionTitle: 'View Now',
         app_name: this.configService.get('app.name'),
         text1: `${mailData.data.docTitle}`,
+      },
+    });
+  }
+
+  async documentApproved(
+    mailData: IMailData<{ docTitle: string; name: string }>,
+  ) {
+    await this.mailerService.sendMail({
+      to: mailData.to,
+      subject: 'Document Approved',
+      template: 'approved',
+      context: {
+        title: 'Your document is approved',
+        actionTitle: 'View Now',
+        app_name: this.configService.get('app.name'),
+        text1: `${mailData.data.name}`,
+        text2: `${mailData.data.docTitle}`,
       },
     });
   }
