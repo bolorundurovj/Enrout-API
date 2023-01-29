@@ -1,3 +1,12 @@
+
+
+# [2.0.0](https://github.com/bolorundurovj/Enrout/compare/1.1.0...2.0.0) (2023-01-29)
+
+
+### Reverts
+
+* Revert "chore: release v1.1.0" ([e08209f](https://github.com/bolorundurovj/Enrout/commit/e08209f95e6a9aa59a0ecd5b41a4b61f69f1e0d5))
+
 ### Changelog
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
