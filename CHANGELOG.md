@@ -1,5 +1,12 @@
 
 
+## [2.0.1](https://github.com/bolorundurovj/Enrout/compare/2.0.0...2.0.1) (2023-01-30)
+
+
+### Features
+
+* Refactor document approval logic ([355fcd3](https://github.com/bolorundurovj/Enrout/commit/355fcd3ac7901d0b397537067c9d4088fb58d697))
+
 # [2.0.0](https://github.com/bolorundurovj/Enrout/compare/1.1.0...2.0.0) (2023-01-29)
 # [1.1.0](https://github.com/bolorundurovj/Enrout/compare/1.0.0...1.1.0) (2023-01-29)
 
