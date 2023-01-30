@@ -274,7 +274,7 @@ export class DocumentService {
       (x) => x.groupRole.designation === designation,
     );
 
-    if (currentIdx < --workflow.workflowItems.length) {
+    if (currentIdx < workflow.workflowItems.length - 1) {
       const staffEntity = await ([
         StaffDesignation.HOD,
         StaffDesignation.Dean,
@@ -291,6 +291,8 @@ export class DocumentService {
       if (!staffEntity) {
         throw new NotFoundException('Staff not found');
       }
+
+      docEntity.currentlyAssignedId = staffEntity.id;
 
       await this.docRepository.update(
         { id: docId },
