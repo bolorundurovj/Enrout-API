@@ -257,7 +257,7 @@ export class DocumentService {
     const docEntity = await queryBuilder.getOne();
 
     if (!docEntity) {
-      throw new NotFoundException();
+      throw new NotFoundException('Document not found');
     }
 
     if (file && !this.validatorService.isPDF(file.mimetype)) {
@@ -275,10 +275,23 @@ export class DocumentService {
     );
 
     if (currentIdx < --workflow.workflowItems.length) {
-      const staffEntity = await this.staffService.findOneByDeptAndRole(
-        deptId,
-        workflow.workflowItems[currentIdx + 1].groupRole.designation,
-      );
+      const staffEntity = await ([
+        StaffDesignation.HOD,
+        StaffDesignation.Dean,
+      ].includes(workflow.workflowItems[currentIdx + 1].groupRole.designation)
+        ? this.staffService.findOneByDeptAndRole(
+            deptId,
+            workflow.workflowItems[currentIdx + 1].groupRole.designation,
+          )
+        : this.staffService.findOne({
+            designation:
+              workflow.workflowItems[currentIdx + 1].groupRole.designation,
+          }));
+
+      if (!staffEntity) {
+        throw new NotFoundException('Staff not found');
+      }
+
       await this.docRepository.update(
         { id: docId },
         {
