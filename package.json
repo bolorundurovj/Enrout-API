@@ -34,7 +34,7 @@
     "copy:lib": "cpx 'src/lib/**/{files,workspace}/**/*.*' dist/lib && cpx 'src/lib/**/{files,workspace}/**/.!(gitignore)' dist/lib",
     "test:e2e": "NODE_ENV=test jest --config ./test/jest-e2e.json",
     "docs:dev": "vuepress dev -p 7070",
-    "docs:build": "vuepress build",
+    "docs:build": "DEPLOY_ENV=gh-pages vuepress build",
     "docs:deploy": "yarn docs:build && gh-pages -d .vuepress/dist",
     "prepare": "husky install",
     "prerelease": "yarn docs:deploy",
