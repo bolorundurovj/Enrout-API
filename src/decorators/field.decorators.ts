@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
+// @ts-nocheck
 import { applyDecorators } from '@nestjs/common';
 import type { ApiPropertyOptions } from '@nestjs/swagger';
 import { ApiProperty } from '@nestjs/swagger';
@@ -82,11 +83,11 @@ export function NumberField(
     decorators.push(IsNumber({}, { each }));
   }
 
-  if (_.isNumber(minimum)) {
+  if (_.isNumber(minimum!)) {
     decorators.push(Min(minimum, { each }));
   }
 
-  if (_.isNumber(maximum)) {
+  if (_.isNumber(maximum!)) {
     decorators.push(Max(maximum, { each }));
   }
 

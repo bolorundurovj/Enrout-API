@@ -19,7 +19,7 @@ import { UserEntity } from './user.entity';
 import { UserService } from './user.service';
 
 @Controller('users')
-@ApiTags('users')
+@ApiTags('Users')
 export class UserController {
   constructor(
     private userService: UserService,
@@ -27,7 +27,7 @@ export class UserController {
   ) {}
 
   @Get('admin')
-  @Auth([RoleType.USER])
+  @Auth([RoleType.ADMIN])
   @HttpCode(HttpStatus.OK)
   @UseLanguageInterceptor()
   async admin(@AuthUser() user: UserEntity) {

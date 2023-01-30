@@ -7,4 +7,10 @@ export class ValidatorService {
 
     return imageMimeTypes.includes(mimeType);
   }
+
+  public isPDF(mimeType: string): boolean {
+    const pdfMimeTypes = ['application/pdf'];
+
+    return pdfMimeTypes.includes(mimeType);
+  }
 }

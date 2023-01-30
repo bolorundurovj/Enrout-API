@@ -17,15 +17,21 @@ export interface IUserEntity extends IAbstractEntity<UserDto> {
 
   role: RoleType;
 
-  email?: string;
+  email: string;
 
-  password?: string;
+  password: string;
 
   phone?: string;
 
   avatar?: string;
 
   fullName?: string;
+
+  universityId: string;
+
+  token?: string;
+
+  tokenExpiry?: Date;
 
   settings?: IUserSettingsEntity;
 }
@@ -36,26 +42,35 @@ export class UserEntity
   extends AbstractEntity<UserDto, UserDtoOptions>
   implements IUserEntity
 {
-  @Column({ nullable: true })
-  firstName?: string;
+  @Column({ nullable: false })
+  firstName: string;
 
-  @Column({ nullable: true })
-  lastName?: string;
+  @Column({ nullable: false })
+  lastName: string;
 
   @Column({ type: 'enum', enum: RoleType, default: RoleType.USER })
   role: RoleType;
 
-  @Column({ unique: true, nullable: true })
-  email?: string;
+  @Column({ unique: true, nullable: false })
+  email: string;
 
-  @Column({ nullable: true })
-  password?: string;
+  @Column({ nullable: false })
+  password: string;
 
   @Column({ nullable: true })
   phone?: string;
 
   @Column({ nullable: true })
   avatar?: string;
+
+  @Column({ unique: true, nullable: false })
+  universityId: string;
+
+  @Column({ nullable: true })
+  token?: string;
+
+  @Column({ nullable: true })
+  tokenExpiry?: Date;
 
   @VirtualColumn()
   fullName?: string;
