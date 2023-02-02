@@ -26,9 +26,6 @@ import { WorkflowModule } from './modules/workflow/workflow.module';
 import { ApiConfigService } from './shared/services/api-config.service';
 import { SharedModule } from './shared/shared.module';
 
-
-console.log(process.env.FIREBASE_KEY);
-
 @Module({
   imports: [
     AuthModule,

@@ -73,10 +73,7 @@ export class UserService {
 
     if (file) {
       const fileName = `${user.firstName}_${user.lastName}_${file.originalname}`;
-      await this.storageService.uploadBytes(
-        fileName,
-        file.buffer,
-      );
+      await this.storageService.uploadBytes(fileName, file.buffer);
 
       user.avatar = await this.storageService.getDownloadURL(fileName);
     }
