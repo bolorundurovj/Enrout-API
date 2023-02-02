@@ -4,6 +4,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { FirebaseModule } from '@nhogs/nestjs-firebase';
 import { I18nModule } from 'nestjs-i18n';
 import path from 'path';
 
@@ -25,6 +26,9 @@ import { WorkflowModule } from './modules/workflow/workflow.module';
 import { ApiConfigService } from './shared/services/api-config.service';
 import { SharedModule } from './shared/shared.module';
 
+
+console.log(process.env.FIREBASE_KEY);
+
 @Module({
   imports: [
     AuthModule,
@@ -34,6 +38,12 @@ import { SharedModule } from './shared/shared.module';
       isGlobal: true,
       envFilePath: '.env',
       load: [appConfig, mailConfig],
+    }),
+    FirebaseModule.forRoot({
+      apiKey: process.env.FIREBASE_KEY,
+      authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+      projectId: process.env.FIREBASE_PROJECT_ID!,
+      storageBucket: process.env.FIREBASE_BUCKET,
     }),
     TypeOrmModule.forRootAsync({
       imports: [SharedModule],

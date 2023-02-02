@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { InjectRepository } from '@nestjs/typeorm';
+import { StorageService } from '@nhogs/nestjs-firebase';
 import { plainToClass } from 'class-transformer';
 import type { FindOptionsWhere } from 'typeorm';
 import { Repository } from 'typeorm';
@@ -27,6 +28,7 @@ export class UserService {
     private validatorService: ValidatorService,
     private awsS3Service: AwsS3Service,
     private commandBus: CommandBus,
+    private storageService: StorageService,
   ) {}
 
   /**
@@ -70,7 +72,13 @@ export class UserService {
     }
 
     if (file) {
-      user.avatar = await this.awsS3Service.uploadImage(file);
+      const fileName = `${user.firstName}_${user.lastName}_${file.originalname}`;
+      await this.storageService.uploadBytes(
+        fileName,
+        file.buffer,
+      );
+
+      user.avatar = await this.storageService.getDownloadURL(fileName);
     }
 
     await this.userRepository.save(user);
