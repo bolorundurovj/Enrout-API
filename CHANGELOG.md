@@ -1,5 +1,19 @@
 
 
+# [2.1.0](https://github.com/bolorundurovj/Enrout/compare/2.0.1...2.1.0) (2023-02-02)
+
+
+### Bug Fixes
+
+* Linting Issues ([fe2219e](https://github.com/bolorundurovj/Enrout/commit/fe2219e25cf9a6759c20a1c949c91d6cea3489b0))
+
+
+### Features
+
+* Refactor Approval Logic ([893f778](https://github.com/bolorundurovj/Enrout/commit/893f778e1948519c4a323bbcbb7ff0c905b09c7a))
+* Setup Firebase Storage ([b79e763](https://github.com/bolorundurovj/Enrout/commit/b79e76368ca62ef370c8da3a97fc2634c3c20ce0))
+* Update Document -> Workflow Relationships ([14e142d](https://github.com/bolorundurovj/Enrout/commit/14e142de7c8f2b140400d561004156030218427c))
+
 ## [2.0.1](https://github.com/bolorundurovj/Enrout/compare/2.0.0...2.0.1) (2023-01-30)
 
 
