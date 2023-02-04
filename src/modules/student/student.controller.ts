@@ -14,6 +14,7 @@ import { PageOptionsDto } from '../../common/dto/page-options.dto';
 import { RoleType } from '../../constants';
 import { Auth, AuthUser, UUIDParam } from '../../decorators';
 import { MailService } from '../../mail/mail.service';
+import { NotificationService } from '../../shared/services/notification.service';
 import { DocumentService } from '../document/document.service';
 import { CreateDocumentDto } from '../document/dto/create-document.dto';
 import type { DocumentDto } from '../document/dto/document.dto';
@@ -34,6 +35,7 @@ export class StudentController {
     private readonly documentService: DocumentService,
     private readonly mailService: MailService,
     private readonly staffService: StaffService,
+    private notificationService: NotificationService,
   ) {}
 
   @Post()
@@ -97,6 +99,12 @@ export class StudentController {
       createDocumentDto,
     );
 
+    await this.notificationService.createNotification(
+      `New Document`,
+      `Created Document ${docEntity.title}`,
+      user.id,
+    );
+
     return docEntity.toDto();
   }
 
@@ -124,6 +132,12 @@ export class StudentController {
       updateDocumentDto,
     );
 
+    await this.notificationService.createNotification(
+      `Updated Document`,
+      `Update Document with ID: ${docEntity.id}`,
+      user.id,
+    );
+
     return docEntity.toDto();
   }
 
@@ -136,6 +150,12 @@ export class StudentController {
     const docEntity = await this.documentService.studentDeleteDocument(
       user.id,
       id,
+    );
+
+    await this.notificationService.createNotification(
+      `Deleted Document`,
+      `Deleted Document ${docEntity.title}`,
+      user.id,
     );
 
     return docEntity.toDto();
@@ -155,6 +175,18 @@ export class StudentController {
 
     const staffEntity = await this.staffService.findById(
       docEntity.currentlyAssignedId,
+    );
+
+    await this.notificationService.createNotification(
+      `Published Document`,
+      `Published Document ${docEntity.title} to ${staffEntity.firstName} ${staffEntity.lastName} (${staffEntity.designation})`,
+      user.id,
+    );
+
+    await this.notificationService.createNotification(
+      `Document Submission`,
+      `${user.firstName} ${user.lastName} has submitted Document: ${docEntity.title} for your review`,
+      staffEntity.id,
     );
 
     await this.mailService.forwardedDocument({
@@ -178,6 +210,18 @@ export class StudentController {
 
     const staffEntity = await this.staffService.findById(
       docEntity.currentlyAssignedId,
+    );
+
+    await this.notificationService.createNotification(
+      `Nudge Staff`,
+      `Sent a reminder on ${docEntity.title} to ${staffEntity.firstName} ${staffEntity.lastName} (${staffEntity.designation})`,
+      user.id,
+    );
+
+    await this.notificationService.createNotification(
+      `Document Reminder`,
+      `${user.firstName} ${user.lastName} sent a reminder to review ${docEntity.title}`,
+      staffEntity.id,
     );
 
     await this.mailService.sendNudge({
@@ -206,6 +250,18 @@ export class StudentController {
 
     const staffEntity = await this.staffService.findById(
       docEntity.currentlyAssignedId,
+    );
+
+    await this.notificationService.createNotification(
+      `Returned Document`,
+      `Returned Document ${docEntity.title} to ${staffEntity.firstName} ${staffEntity.lastName} (${staffEntity.designation})`,
+      user.id,
+    );
+
+    await this.notificationService.createNotification(
+      `Returned Document`,
+      `Returned Document ${docEntity.title} from ${user.firstName} ${user.lastName}`,
+      staffEntity.id,
     );
 
     await this.mailService.returnedDocMail({

@@ -16,6 +16,7 @@ import { DocumentState, RoleType } from '../../constants';
 import { ApiFile, Auth, AuthUser, UUIDParam } from '../../decorators';
 import { IFile } from '../../interfaces';
 import { MailService } from '../../mail/mail.service';
+import { NotificationService } from '../../shared/services/notification.service';
 import { IUnifiedUser } from '../auth/jwt.strategy';
 import { DocumentService } from '../document/document.service';
 import type { DocumentDto } from '../document/dto/document.dto';
@@ -40,6 +41,7 @@ export class StaffController {
     private readonly documentService: DocumentService,
     private readonly mailService: MailService,
     private readonly studentService: StudentService,
+    private readonly notificationService: NotificationService,
   ) {}
 
   @Post()
@@ -112,6 +114,12 @@ export class StaffController {
       updateDocumentDto,
     );
 
+    await this.notificationService.createNotification(
+      `Updated Document`,
+      `Update Document with ID: ${docEntity.id}`,
+      user.id,
+    );
+
     return docEntity.toDto();
   }
 
@@ -133,9 +141,21 @@ export class StaffController {
       file,
     );
 
+    await this.notificationService.createNotification(
+      `Approved Document`,
+      `Approved Document with ID: ${docEntity.id}`,
+      user.id,
+    );
+
     if (docEntity.state === DocumentState.APPROVED) {
       const studentEntity = await this.studentService.findById(
         docEntity.ownerId,
+      );
+
+      await this.notificationService.createNotification(
+        `Approved Document`,
+        `Document ${docEntity.title} with ID: ${docEntity.id} has been approved`,
+        studentEntity.id,
       );
 
       await this.mailService.documentApproved({
@@ -148,6 +168,12 @@ export class StaffController {
     } else {
       const staffEntity = await this.staffService.findById(
         docEntity.currentlyAssignedId,
+      );
+
+      await this.notificationService.createNotification(
+        `Forwarded Document`,
+        `Document with ID: ${docEntity.id} requires your attention`,
+        staffEntity.id,
       );
 
       await this.mailService.forwardedDocument({
@@ -177,6 +203,18 @@ export class StaffController {
 
     const studentEntity = await this.studentService.findById(docEntity.ownerId);
 
+    await this.notificationService.createNotification(
+      `Rejected Document`,
+      `Rejected Document with ID: ${docEntity.id}`,
+      user.id,
+    );
+
+    await this.notificationService.createNotification(
+      `Rejected Document`,
+      `Your document ${docEntity.title} with ID: ${docEntity.id} has been rejected`,
+      studentEntity.id,
+    );
+
     await this.mailService.docRejectedMail({
       to: studentEntity.email,
       data: {
@@ -202,6 +240,18 @@ export class StaffController {
 
     const studentEntity = await this.studentService.findById(docEntity.ownerId);
 
+    await this.notificationService.createNotification(
+      `Changes Requested`,
+      `Changes Requested on Document with ID: ${docEntity.id}`,
+      user.id,
+    );
+
+    await this.notificationService.createNotification(
+      `Changes Requested`,
+      `Your document ${docEntity.title} with ID: ${docEntity.id} needs some changes`,
+      studentEntity.id,
+    );
+
     await this.mailService.changeRequestedMail({
       to: studentEntity.email,
       data: {
@@ -223,6 +273,12 @@ export class StaffController {
       user.id,
       id,
       body.workflowId,
+    );
+
+    await this.notificationService.createNotification(
+      `Document Workflow`,
+      `Set Workflow for Document with ID: ${docEntity.id}. Workflow ID: ${body.workflowId}`,
+      user.id,
     );
 
     return docEntity.toDto();
