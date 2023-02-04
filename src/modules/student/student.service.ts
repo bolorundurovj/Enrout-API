@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { StorageService } from '@nhogs/nestjs-firebase';
 import type { FindOptionsWhere } from 'typeorm';
 import { Repository } from 'typeorm';
 import { Transactional } from 'typeorm-transactional-cls-hooked';
@@ -23,6 +24,7 @@ export class StudentService {
     private studentRepository: Repository<StudentEntity>,
     private awsS3Service: AwsS3Service,
     private validatorService: ValidatorService,
+    private storageService: StorageService,
   ) {}
 
   @Transactional()
@@ -43,7 +45,10 @@ export class StudentService {
     }
 
     if (file) {
-      student.avatar = await this.awsS3Service.uploadImage(file);
+      const fileName = `${createStudentDto.firstName}_${createStudentDto.lastName}_${file.originalname}`;
+      await this.storageService.uploadBytes(fileName, file.buffer);
+
+      student.avatar = await this.storageService.getDownloadURL(fileName);
     }
 
     await this.studentRepository.save(student);

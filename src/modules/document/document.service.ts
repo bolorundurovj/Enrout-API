@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { StorageService } from '@nhogs/nestjs-firebase';
 import { Repository } from 'typeorm';
 import { Transactional } from 'typeorm-transactional-cls-hooked';
 
@@ -26,6 +27,7 @@ export class DocumentService {
     private workflowService: WorkflowService,
     private validatorService: ValidatorService,
     private awsS3Service: AwsS3Service,
+    private storageService: StorageService,
   ) {}
 
   @Transactional()
@@ -265,7 +267,12 @@ export class DocumentService {
     }
 
     if (file) {
-      docEntity.reviewerAttachment = await this.awsS3Service.uploadImage(file);
+      const fileName = `${docEntity.title}_${userId}_${file.originalname}`;
+      await this.storageService.uploadBytes(fileName, file.buffer);
+
+      docEntity.reviewerAttachment = await this.storageService.getDownloadURL(
+        fileName,
+      );
     }
 
     const workflow = await this.workflowService.findOne(docEntity.workflowId);
@@ -513,7 +520,7 @@ export class DocumentService {
    * It returns a document entity with the specified id, owned by the specified student, with the owner, currently assigned
    * and workflow details
    * @param {Uuid} studentId - Uuid - This is the id of the student who owns the document.
-   * @param {Uuid} id - Uuid - This is the id of the document you want to retrieve.
+   * @param {Uuid} docId - Uuid - This is the id of the document you want to retrieve.
    * @returns A document entity
    */
   async studentFindOne(studentId: Uuid, docId: Uuid): Promise<DocumentEntity> {
