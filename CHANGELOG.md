@@ -1,5 +1,13 @@
 
 
+# [2.2.0](https://github.com/bolorundurovj/Enrout/compare/2.1.0...2.2.0) (2023-02-05)
+
+
+### Features
+
+* Save Action Notifications ([6b12cc9](https://github.com/bolorundurovj/Enrout/commit/6b12cc9e7209f68af1d759ab9003f2daa7b4d0c1))
+* Upload Files ([d8c751f](https://github.com/bolorundurovj/Enrout/commit/d8c751f5fafb65d95859324ba73ecba2d7358fe1))
+
 # [2.1.0](https://github.com/bolorundurovj/Enrout/compare/2.0.1...2.1.0) (2023-02-02)
 
 
