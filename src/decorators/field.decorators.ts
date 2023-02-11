@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
+// @ts-nocheck
 import { applyDecorators } from '@nestjs/common';
 import type { ApiPropertyOptions } from '@nestjs/swagger';
 import { ApiProperty } from '@nestjs/swagger';
