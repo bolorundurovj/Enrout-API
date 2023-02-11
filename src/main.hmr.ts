@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { bootstrap } from './main';
 
 void bootstrap().then((app) => {
