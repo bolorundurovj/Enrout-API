@@ -9,6 +9,7 @@ import { Transport } from '@nestjs/microservices';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import compression from 'compression';
+import basicAuth from 'express-basic-auth';
 import { middleware as expressCtx } from 'express-ctx';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
@@ -90,6 +91,15 @@ export async function bootstrap(): Promise<NestExpressApplication> {
   }
 
   if (configService.documentationEnabled) {
+    app.use(
+      ['/documentation', '/docs', '/docs-json'],
+      basicAuth({
+        challenge: true,
+        users: {
+          joshua: 'secret1234',
+        },
+      }),
+    );
     setupSwagger(app);
   }
 
