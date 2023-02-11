@@ -12312,7 +12312,7 @@ vuepress@^2.0.0-beta.35:
   resolved "https://registry.yarnpkg.com/vuepress/-/vuepress-2.0.0-beta.50-pre.1.tgz#26eec90444bb37590f29d10dd5923e75c476189f"
   integrity sha512-4Finc3GDscIqgRFAZFwa4SUm8tIFSVQIxnPIpQPW3kaM37rKylvUDkLrs2lMvoDPTAAE+Kf+v34tAFX+ZMGKUg==
   dependencies:
-    vuepress-vite "2.0.0-beta.50-pre.1"
+    vuepress-vite "2.0.0-beta.60"
 
 walker@^1.0.8:
   version "1.0.8"
