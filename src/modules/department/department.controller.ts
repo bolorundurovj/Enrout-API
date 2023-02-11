@@ -11,7 +11,8 @@ import { ApiTags } from '@nestjs/swagger';
 
 import type { PageDto } from '../../common/dto/page.dto';
 import { PageOptionsDto } from '../../common/dto/page-options.dto';
-import { UUIDParam } from '../../decorators';
+import { RoleType } from '../../constants';
+import { Auth, UUIDParam } from '../../decorators';
 import { DepartmentService } from './department.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import type { DepartmentDto } from './dto/department.dto';
@@ -23,6 +24,7 @@ export class DepartmentController {
   constructor(private readonly departmentService: DepartmentService) {}
 
   @Post()
+  @Auth([RoleType.ADMIN])
   async create(@Body() createDepartmentDto: CreateDepartmentDto) {
     const deptEntity = await this.departmentService.create(createDepartmentDto);
 
@@ -37,6 +39,7 @@ export class DepartmentController {
   }
 
   @Get(':id')
+  @Auth()
   async findOne(@UUIDParam('id') id: Uuid): Promise<DepartmentDto> {
     const deptEntity = await this.departmentService.findOne(id);
 
@@ -44,6 +47,7 @@ export class DepartmentController {
   }
 
   @Patch(':id')
+  @Auth([RoleType.ADMIN])
   async update(
     @UUIDParam('id') id: Uuid,
     @Body() updateDepartmentDto: UpdateDepartmentDto,
@@ -57,6 +61,7 @@ export class DepartmentController {
   }
 
   @Delete(':id')
+  @Auth([RoleType.ADMIN])
   async remove(@UUIDParam('id') id: Uuid): Promise<DepartmentDto> {
     const deptEntity = await this.departmentService.remove(id);
 

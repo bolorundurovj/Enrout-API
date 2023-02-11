@@ -11,7 +11,8 @@ import { ApiTags } from '@nestjs/swagger';
 
 import type { PageDto } from '../../common/dto/page.dto';
 import { PageOptionsDto } from '../../common/dto/page-options.dto';
-import { UUIDParam } from '../../decorators';
+import { RoleType } from '../../constants';
+import { Auth, UUIDParam } from '../../decorators';
 import { CreateGroupRoleDto } from './dto/create-group-role.dto';
 import type { GroupRoleDto } from './dto/group-role.dto';
 import { UpdateGroupRoleDto } from './dto/update-group-role.dto';
@@ -23,6 +24,7 @@ export class GroupRoleController {
   constructor(private readonly groupRoleService: GroupRoleService) {}
 
   @Post()
+  @Auth([RoleType.ADMIN])
   async create(@Body() createGroupRoleDto: CreateGroupRoleDto) {
     const groupEntity = await this.groupRoleService.create(createGroupRoleDto);
 
@@ -30,6 +32,7 @@ export class GroupRoleController {
   }
 
   @Get()
+  @Auth()
   findAll(
     @Query() pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<GroupRoleDto>> {
@@ -37,6 +40,7 @@ export class GroupRoleController {
   }
 
   @Get(':id')
+  @Auth()
   async findOne(@UUIDParam('id') id: Uuid) {
     const entity = await this.groupRoleService.findOne(id);
 
@@ -44,6 +48,7 @@ export class GroupRoleController {
   }
 
   @Patch(':id')
+  @Auth([RoleType.ADMIN])
   async update(
     @UUIDParam('id') id: Uuid,
     @Body() updateGroupRoleDto: UpdateGroupRoleDto,
@@ -54,6 +59,7 @@ export class GroupRoleController {
   }
 
   @Delete(':id')
+  @Auth([RoleType.ADMIN])
   async remove(@UUIDParam('id') id: Uuid): Promise<GroupRoleDto> {
     const entity = await this.groupRoleService.remove(id);
 

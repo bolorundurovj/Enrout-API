@@ -39,6 +39,7 @@ export class StudentController {
   ) {}
 
   @Post()
+  @Auth([RoleType.ADMIN])
   async create(@Body() createStudentDto: CreateStudentDto) {
     const studentEntity = await this.studentService.create(createStudentDto);
 
@@ -46,6 +47,7 @@ export class StudentController {
   }
 
   @Get()
+  @Auth([RoleType.ADMIN])
   async findAll(
     @Query() pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<StudentDto>> {
@@ -62,6 +64,7 @@ export class StudentController {
   }
 
   @Get(':id')
+  @Auth([RoleType.ADMIN])
   async findOne(@UUIDParam('id') id: Uuid): Promise<StudentDto> {
     const studentEntity = await this.studentService.findById(id);
 
@@ -69,6 +72,7 @@ export class StudentController {
   }
 
   @Patch(':id')
+  @Auth([RoleType.ADMIN])
   async update(
     @UUIDParam('id') id: Uuid,
     @Body() updateStudentDto: UpdateStudentDto,
@@ -82,6 +86,7 @@ export class StudentController {
   }
 
   @Delete(':id')
+  @Auth([RoleType.ADMIN])
   async remove(@UUIDParam('id') id: Uuid): Promise<StudentDto> {
     const studentEntity = await this.studentService.remove(id);
 

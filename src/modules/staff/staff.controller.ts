@@ -45,6 +45,7 @@ export class StaffController {
   ) {}
 
   @Post()
+  @Auth([RoleType.ADMIN])
   async create(@Body() createStaffDto: CreateStaffDto) {
     const staffEntity = await this.staffService.create(createStaffDto);
 
@@ -52,6 +53,7 @@ export class StaffController {
   }
 
   @Get()
+  @Auth([RoleType.ADMIN])
   async findAll(
     @Query() pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<StaffDto>> {
@@ -68,6 +70,7 @@ export class StaffController {
   }
 
   @Get(':id')
+  @Auth([RoleType.ADMIN])
   async findOne(@UUIDParam('id') id: Uuid): Promise<StaffDto> {
     const staffEntity = await this.staffService.findById(id);
 
@@ -75,6 +78,7 @@ export class StaffController {
   }
 
   @Patch(':id')
+  @Auth([RoleType.ADMIN])
   async update(
     @UUIDParam('id') id: Uuid,
     @Body() updateStaffDto: UpdateStaffDto,
@@ -85,6 +89,7 @@ export class StaffController {
   }
 
   @Delete(':id')
+  @Auth([RoleType.ADMIN])
   async remove(@UUIDParam('id') id: Uuid): Promise<StaffDto> {
     const staffEntity = await this.staffService.remove(id);
 
@@ -103,6 +108,7 @@ export class StaffController {
   }
 
   @Patch('documents/:id')
+  @Auth([RoleType.STAFF])
   async updateDOc(
     @UUIDParam('id') id: Uuid,
     @Body() updateDocumentDto: UpdateDocumentDto,
