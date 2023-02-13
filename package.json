@@ -7,8 +7,9 @@
   "license": "MIT",
   "scripts": {
     "build:prod": "tsc -p tsconfig.build.json",
+    "build": "tsc -p tsconfig.build.json",
     "postbuild:prod": "copyfiles --up 1 src/**/*.json dist",
-    "start": "yarn build:prod && yarn start:prod",
+    "start": "yarn start:prod",
     "start:hmr": "node dist/main.hmr.ts",
     "start:dev": "ts-node src/main.ts",
     "start:prod": "node --max_old_space_size=2560 ../dist/main.js",
