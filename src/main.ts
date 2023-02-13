@@ -91,15 +91,18 @@ export async function bootstrap(): Promise<NestExpressApplication> {
   }
 
   if (configService.documentationEnabled) {
-    app.use(
-      ['/documentation', '/docs', '/docs-json'],
-      basicAuth({
-        challenge: true,
-        users: {
-          joshua: 'secret1234',
-        },
-      }),
-    );
+    if (configService.isProduction) {
+      app.use(
+        ['/documentation', '/docs', '/docs-json'],
+        basicAuth({
+          challenge: true,
+          users: {
+            joshua: 'secret1234',
+          },
+        }),
+      );
+    }
+
     setupSwagger(app);
   }
 
