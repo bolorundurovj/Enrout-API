@@ -12,7 +12,18 @@ import appConfig from './config/app.config';
 import mailConfig from './config/mail.config';
 import { MailModule } from './mail/mail.module';
 import { MailConfigService } from './mail/mail-config.service';
+import { AdminModule } from './modules/admin/admin.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { DepartmentModule } from './modules/department/department.module';
+import { DocumentModule } from './modules/document/document.module';
+import { GroupModule } from './modules/group/group.module';
+import { GroupRoleModule } from './modules/group-role/group-role.module';
 import { HealthCheckerModule } from './modules/health-checker/health-checker.module';
+import { PostModule } from './modules/post/post.module';
+import { StaffModule } from './modules/staff/staff.module';
+import { StudentModule } from './modules/student/student.module';
+import { UserModule } from './modules/user/user.module';
+import { WorkflowModule } from './modules/workflow/workflow.module';
 import { ApiConfigService } from './shared/services/api-config.service';
 import { SharedModule } from './shared/shared.module';
 
@@ -51,6 +62,17 @@ import { SharedModule } from './shared/shared.module';
     }),
     HealthCheckerModule,
     MailModule,
+    GroupModule,
+    DepartmentModule,
+    WorkflowModule,
+    StudentModule,
+    StaffModule,
+    GroupRoleModule,
+    DocumentModule,
+    AdminModule,
+    AuthModule,
+    UserModule,
+    PostModule,
   ],
   providers: [],
 })
