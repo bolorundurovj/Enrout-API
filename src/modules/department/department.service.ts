@@ -84,4 +84,14 @@ export class DepartmentService {
 
     return deptEntity;
   }
+
+  /**
+   * It returns the number of departments in the database
+   * @returns The number of rows in the table.
+   */
+  async getCount(): Promise<number> {
+    const queryBuilder = this.deptRepository.createQueryBuilder('dept');
+
+    return queryBuilder.getCount();
+  }
 }

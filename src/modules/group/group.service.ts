@@ -77,4 +77,17 @@ export class GroupService {
 
     return groupEntity;
   }
+
+  /**
+   * "Get the count of all groups in the database."
+   *
+   * The first line of the function is a TypeScript annotation. It tells the compiler that the function will return a
+   * Promise of a number
+   * @returns The number of groups in the database.
+   */
+  async getCount(): Promise<number> {
+    const queryBuilder = this.groupRepository.createQueryBuilder('group');
+
+    return queryBuilder.getCount();
+  }
 }

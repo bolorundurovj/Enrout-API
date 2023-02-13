@@ -12,6 +12,7 @@ import appConfig from './config/app.config';
 import mailConfig from './config/mail.config';
 import { MailModule } from './mail/mail.module';
 import { MailConfigService } from './mail/mail-config.service';
+import { AdminModule } from './modules/admin/admin.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { DepartmentModule } from './modules/department/department.module';
 import { DocumentModule } from './modules/document/document.module';
@@ -71,6 +72,7 @@ import { SharedModule } from './shared/shared.module';
     StaffModule,
     GroupRoleModule,
     DocumentModule,
+    AdminModule,
   ],
   providers: [],
 })

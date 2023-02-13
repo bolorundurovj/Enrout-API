@@ -183,4 +183,14 @@ export class StudentService {
 
     return userEntity.raw;
   }
+
+  /**
+   * It returns the number of students in the database
+   * @returns The number of students in the database.
+   */
+  async getCount(): Promise<number> {
+    const queryBuilder = this.studentRepository.createQueryBuilder('student');
+
+    return queryBuilder.getCount();
+  }
 }

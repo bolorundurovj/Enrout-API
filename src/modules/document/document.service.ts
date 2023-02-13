@@ -631,4 +631,14 @@ export class DocumentService {
 
     return docEntity;
   }
+
+  /**
+   * It returns the number of documents in the database
+   * @returns The number of documents in the database.
+   */
+  async getCount(): Promise<number> {
+    const queryBuilder = this.docRepository.createQueryBuilder('doc');
+
+    return queryBuilder.getCount();
+  }
 }

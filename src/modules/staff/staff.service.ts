@@ -199,4 +199,14 @@ export class StaffService {
 
     return userEntity.raw;
   }
+
+  /**
+   * It returns the number of staff members in the database
+   * @returns The number of staff members in the database.
+   */
+  async getCount(): Promise<number> {
+    const queryBuilder = this.staffRepository.createQueryBuilder('staff');
+
+    return queryBuilder.getCount();
+  }
 }
