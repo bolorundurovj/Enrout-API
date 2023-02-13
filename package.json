@@ -11,7 +11,7 @@
     "start": "yarn build:prod && yarn start:prod",
     "start:hmr": "node dist/main.hmr.ts",
     "start:dev": "ts-node src/main.ts",
-    "start:prod": "node ../dist/main.js",
+    "start:prod": "node --max_old_space_size=2560 ../dist/main.js",
     "typeorm": "typeorm-ts-node-esm",
     "migration:generate": "yarn run typeorm migration:generate -d ormconfig",
     "migration:create": "yarn run typeorm migration:create -d ormconfig",
