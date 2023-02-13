@@ -7,8 +7,8 @@
   "license": "MIT",
   "scripts": {
     "build:prod": "tsc -p tsconfig.build.json",
-    "build": "tsc -p tsconfig.build.json",
     "postbuild:prod": "copyfiles --up 1 src/**/*.json dist",
+    "heroku-postbuild": "yarn build:prod",
     "start": "yarn start:prod",
     "start:hmr": "node dist/main.hmr.ts",
     "start:dev": "ts-node src/main.ts",
