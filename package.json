@@ -70,6 +70,7 @@
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.21",
     "mime-types": "^2.1.35",
+    "moment": "^2.29.4",
     "morgan": "^1.10.0",
     "nats": "^2.7.1",
     "nestjs-i18n": "^9.1.10",
