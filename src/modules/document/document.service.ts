@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { StorageService } from '@nhogs/nestjs-firebase';
+import moment from 'moment';
 import { Repository } from 'typeorm';
 import { Transactional } from 'typeorm-transactional-cls-hooked';
 
@@ -11,6 +12,7 @@ import { FileNotPdfException } from '../../exceptions';
 import type { IFile } from '../../interfaces';
 import { AwsS3Service } from '../../shared/services/aws-s3.service';
 import { ValidatorService } from '../../shared/services/validator.service';
+import { StatisticsDto } from '../staff/dto/statistics.dto';
 import { StaffService } from '../staff/staff.service';
 import { WorkflowService } from '../workflow/workflow.service';
 import { CreateDocumentDto } from './dto/create-document.dto';
@@ -640,5 +642,78 @@ export class DocumentService {
     const queryBuilder = this.docRepository.createQueryBuilder('doc');
 
     return queryBuilder.getCount();
+  }
+
+  /**
+   * It returns the total number of documents, the number of students who have documents, and the number of documents in
+   * each state
+   * @param {Uuid} staffId - Uuid - The staff's id
+   * @returns An object with the total number of documents, the number of students, and the number of documents in each
+   * category.
+   */
+  async getStaffStatistics(staffId: Uuid) {
+    const startOfDay = new Date();
+    startOfDay.setDate(startOfDay.getDate() - 7);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const queryBuilder = this.docRepository
+      .createQueryBuilder('doc')
+      .where('doc.currentlyAssigned = :id', { id: staffId });
+
+    const total = await queryBuilder.getCount();
+    const studentCount = await queryBuilder
+      .select('COUNT(DISTINCT(owner_id))', 'count')
+      .getRawOne();
+    const categories = await this.docRepository
+      .createQueryBuilder('doc')
+      .where('doc.currentlyAssigned = :id', { id: staffId })
+      .groupBy('doc.state')
+      .orderBy('doc.state')
+      .select('COUNT(doc.id)', 'count')
+      .addSelect('doc.state', 'state')
+      .getRawMany();
+
+    const start = moment().subtract(6, 'days').startOf('day');
+    const end = moment().endOf('day');
+
+    const queryResult = await this.docRepository
+      .createQueryBuilder('doc')
+      .where('doc.currentlyAssigned = :id', { id: staffId })
+      .select("state, DATE_TRUNC('day', created_at) as day, COUNT(id) as count")
+      .where('created_at BETWEEN :start AND :end', { start, end })
+      .groupBy('state, day')
+      .orderBy('day, state')
+      .getRawMany();
+
+    const uniqueStatuses = [
+      DocumentState.PENDING,
+      DocumentState.APPROVED,
+      DocumentState.REJECTED,
+      DocumentState.CHANGE_REQUESTED,
+      DocumentState.DRAFT,
+    ];
+
+    const processedData = uniqueStatuses.map((state) => {
+      const itemsByStatus = queryResult.filter((row) => row.state === state);
+      // eslint-disable-next-line unicorn/no-array-reduce
+      const countByDay = itemsByStatus.reduce((acc, row) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        const day = moment(row.day).diff(start, 'days');
+        acc[day] = Number(row.count);
+
+        return acc;
+      }, Array.from({ length: 7 }).fill(0));
+
+      return { name: state, data: countByDay };
+    });
+
+    const stats = new StatisticsDto();
+
+    stats.submissions = total;
+    stats.submissionsByCategory = categories;
+    stats.students = Number(studentCount.count);
+    stats.weeklySubmissions = processedData;
+
+    return stats;
   }
 }

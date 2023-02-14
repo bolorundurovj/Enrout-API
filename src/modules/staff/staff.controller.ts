@@ -8,7 +8,7 @@ import {
   Query,
   UploadedFile,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
 import type { PageDto } from '../../common/dto/page.dto';
 import { PageOptionsDto } from '../../common/dto/page-options.dto';
@@ -29,6 +29,7 @@ import { StudentService } from '../student/student.service';
 import { CreateStaffDto } from './dto/create-staff.dto';
 import { ForwardDocumentDto } from './dto/forward-document.dto';
 import type { StaffDto } from './dto/staff.dto';
+import { StatisticsDto } from './dto/statistics.dto';
 import { UpdateStaffDto } from './dto/update-staff.dto';
 import type { StaffEntity } from './entities/staff.entity';
 import { StaffService } from './staff.service';
@@ -67,6 +68,15 @@ export class StaffController {
     @AuthUser() user: StudentEntity,
   ): Promise<PageDto<DocumentDto>> {
     return this.documentService.findStaffAssignedDocs(user.id, pageOptionsDto);
+  }
+
+  @Get('/dashboard-stats')
+  @ApiOkResponse({ type: StatisticsDto, description: 'Staff Statistics' })
+  @Auth([RoleType.STAFF])
+  async getDashboardStats(
+    @AuthUser() user: StudentEntity,
+  ): Promise<StatisticsDto> {
+    return this.documentService.getStaffStatistics(user.id);
   }
 
   @Get(':id')
