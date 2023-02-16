@@ -1,5 +1,62 @@
 
 
+# [2.3.0](https://github.com/bolorundurovj/Enrout/compare/2.2.0...2.3.0) (2023-02-16)
+
+
+### Bug Fixes
+
+* Build && Linting Issues ([c3cfe0e](https://github.com/bolorundurovj/Enrout/commit/c3cfe0e29bcb9f88eca5e1cf9144952fe74094cc))
+* Circular Dependency Issues ([c11a722](https://github.com/bolorundurovj/Enrout/commit/c11a7220f63853c58b2938dc3faced743c503898))
+* Circular Dependency Issues ([08a9663](https://github.com/bolorundurovj/Enrout/commit/08a966338796a567a74f6f8e2f4b283dd043b4ea))
+* Dependency Break ([66daac2](https://github.com/bolorundurovj/Enrout/commit/66daac2e3edb5dc1d355901fdace851dd4447c07))
+* Lockfile Dependencies ([60dead5](https://github.com/bolorundurovj/Enrout/commit/60dead5f85ffec6a3f2dccb36c8e1bcb4c9361c1))
+* Update Config for Heroku Deployment ([bc0d807](https://github.com/bolorundurovj/Enrout/commit/bc0d807ee84fdfb6bb6397937fac5eaa024aea29))
+* Update Config for Heroku Deployment ([daea87b](https://github.com/bolorundurovj/Enrout/commit/daea87bdb342c570bff3c5824c3c802276438cfc))
+
+
+### Features
+
+* Add Moment ([515e39b](https://github.com/bolorundurovj/Enrout/commit/515e39b5fe4597ec7ace00b8606e0b07e4991a82))
+* Add Swagger UI Protection ([1bf3fdb](https://github.com/bolorundurovj/Enrout/commit/1bf3fdbba55b73d2e0e2ae1be4b79d0ec3d8bdb4))
+* **breaking:** Add engine to package.json ([665676c](https://github.com/bolorundurovj/Enrout/commit/665676cef80cc491f8577e4f4b50a60b03e680d9))
+* **breaking:** Remove engine from package.json ([eca7339](https://github.com/bolorundurovj/Enrout/commit/eca7339c579e425690fdee6c9b44161fdc2b438a))
+* **breaking:** Update dist location for prod heroku ([d68b87b](https://github.com/bolorundurovj/Enrout/commit/d68b87b8415fed762d0ce4d9e7d7e098fe604b2a))
+* **breaking:** Update Procfile ([4e50a39](https://github.com/bolorundurovj/Enrout/commit/4e50a399d44c3e2745fb271c7c3e97c0c69f4505))
+* **breaking:** Update Procfile ([e49b48b](https://github.com/bolorundurovj/Enrout/commit/e49b48b03cae1224582d81354532c1854afd6ce4))
+* **breaking:** Update Scripts ([b1d91e0](https://github.com/bolorundurovj/Enrout/commit/b1d91e077aac94350c1df124c5aa667a8838cfad))
+* **breaking:** Update Scripts ([f89e824](https://github.com/bolorundurovj/Enrout/commit/f89e824dd9f432dac2d3b937da59572c1d277f0d))
+* **breaking:** Update Scripts ([fa6575b](https://github.com/bolorundurovj/Enrout/commit/fa6575b42037afd4989bb59908a57129e1beac6e))
+* **breaking:** Update Scripts ([ed9ba0f](https://github.com/bolorundurovj/Enrout/commit/ed9ba0fd64743a22906b03933d7eca504007111f))
+* **breaking:** Update Scripts ([5263f99](https://github.com/bolorundurovj/Enrout/commit/5263f99b06b24c53d220d0632f72f495d88d15b7))
+* **breaking:** Update Scripts ([3e75334](https://github.com/bolorundurovj/Enrout/commit/3e75334a6ee11608008fff52494376d83a067148))
+* Get Admin Statistics ([ffe74d7](https://github.com/bolorundurovj/Enrout/commit/ffe74d7227715ef9edc1b517525213664af2de29))
+* Get Staff Statistics ([954ea96](https://github.com/bolorundurovj/Enrout/commit/954ea96da919cd22edf113c654168275bddf0ec8))
+* Get Student Dashboard Stats ([db7753e](https://github.com/bolorundurovj/Enrout/commit/db7753e3c70dd1e5baa17db274f325ad8e41dbec))
+* Require Auth for Swagger in Production ([8224093](https://github.com/bolorundurovj/Enrout/commit/82240933adbebf27447298d84fc7e3545457e236))
+* Update Route Guards ([b41d3d8](https://github.com/bolorundurovj/Enrout/commit/b41d3d8830f8420e40a08710548460853dfcbc43))
+
+# [2.2.0](https://github.com/bolorundurovj/Enrout/compare/2.1.0...2.2.0) (2023-02-05)
+
+
+### Features
+
+* Save Action Notifications ([6b12cc9](https://github.com/bolorundurovj/Enrout/commit/6b12cc9e7209f68af1d759ab9003f2daa7b4d0c1))
+* Upload Files ([d8c751f](https://github.com/bolorundurovj/Enrout/commit/d8c751f5fafb65d95859324ba73ecba2d7358fe1))
+
+# [2.1.0](https://github.com/bolorundurovj/Enrout/compare/2.0.1...2.1.0) (2023-02-02)
+
+
+### Bug Fixes
+
+* Linting Issues ([fe2219e](https://github.com/bolorundurovj/Enrout/commit/fe2219e25cf9a6759c20a1c949c91d6cea3489b0))
+
+
+### Features
+
+* Refactor Approval Logic ([893f778](https://github.com/bolorundurovj/Enrout/commit/893f778e1948519c4a323bbcbb7ff0c905b09c7a))
+* Setup Firebase Storage ([b79e763](https://github.com/bolorundurovj/Enrout/commit/b79e76368ca62ef370c8da3a97fc2634c3c20ce0))
+* Update Document -> Workflow Relationships ([14e142d](https://github.com/bolorundurovj/Enrout/commit/14e142de7c8f2b140400d561004156030218427c))
+
 ## [2.0.1](https://github.com/bolorundurovj/Enrout/compare/2.0.0...2.0.1) (2023-01-30)
 
 

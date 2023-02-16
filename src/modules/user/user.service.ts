@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { InjectRepository } from '@nestjs/typeorm';
+import { StorageService } from '@nhogs/nestjs-firebase';
 import { plainToClass } from 'class-transformer';
 import type { FindOptionsWhere } from 'typeorm';
 import { Repository } from 'typeorm';
 import { Transactional } from 'typeorm-transactional-cls-hooked';
 
 import type { PageDto } from '../../common/dto/page.dto';
+import { RoleType } from '../../constants';
 import { FileNotImageException, UserNotFoundException } from '../../exceptions';
 import { IFile } from '../../interfaces';
 import { AwsS3Service } from '../../shared/services/aws-s3.service';
@@ -27,6 +29,7 @@ export class UserService {
     private validatorService: ValidatorService,
     private awsS3Service: AwsS3Service,
     private commandBus: CommandBus,
+    private storageService: StorageService,
   ) {}
 
   /**
@@ -70,7 +73,10 @@ export class UserService {
     }
 
     if (file) {
-      user.avatar = await this.awsS3Service.uploadImage(file);
+      const fileName = `${user.firstName}_${user.lastName}_${file.originalname}`;
+      await this.storageService.uploadBytes(fileName, file.buffer);
+
+      user.avatar = await this.storageService.getDownloadURL(fileName);
     }
 
     await this.userRepository.save(user);
@@ -139,5 +145,35 @@ export class UserService {
     );
 
     return userEntity.raw;
+  }
+
+  /**
+   * "Get the number of users with the role of USER."
+   *
+   * The first thing we do is create a query builder. This is a class that allows us to build a query. We pass in the name
+   * of the entity we want to query, which is user
+   * @returns The number of users in the database.
+   */
+  async getUserCount(): Promise<number> {
+    const queryBuilder = this.userRepository.createQueryBuilder('user');
+
+    queryBuilder.where('user.role = :role', { role: RoleType.USER });
+
+    return queryBuilder.getCount();
+  }
+
+  /**
+   * "Get the number of users with the role of admin."
+   *
+   * The first thing we do is create a query builder. This is a class that allows us to build a query. We pass in the name
+   * of the entity we want to query, which is user
+   * @returns The number of users with the role of admin.
+   */
+  async getAdminCount(): Promise<number> {
+    const queryBuilder = this.userRepository.createQueryBuilder('user');
+
+    queryBuilder.where('user.role = :role', { role: RoleType.ADMIN });
+
+    return queryBuilder.getCount();
   }
 }

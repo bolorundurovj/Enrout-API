@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -23,32 +24,6 @@ export class ApiConfigService {
 
   get isTest(): boolean {
     return this.nodeEnv === 'test';
-  }
-
-  private getNumber(key: string): number {
-    const value = this.get(key);
-
-    try {
-      return Number(value);
-    } catch {
-      throw new Error(key + ' environment variable is not a number');
-    }
-  }
-
-  private getBoolean(key: string): boolean {
-    const value = this.get(key);
-
-    try {
-      return Boolean(JSON.parse(value));
-    } catch {
-      throw new Error(key + ' env var is not a boolean');
-    }
-  }
-
-  private getString(key: string): string {
-    const value = this.get(key);
-
-    return value.replace(/\\n/g, '\n');
   }
 
   get nodeEnv(): string {
@@ -148,10 +123,48 @@ export class ApiConfigService {
     };
   }
 
+  get firebaseConfig() {
+    return {
+      apiKey: this.getString('FIREBASE_KEY'),
+      projectId: this.getString('FIREBASE_PROJECT_ID'),
+      authDomain: this.getString('FIREBASE_AUTH_DOMAIN'),
+      storageBucket: this.getString('FIREBASE_BUCKET'),
+      senderId: this.getString('FIREBASE_SENDER_ID'),
+      appId: this.getString('FIREBASE_APP_ID'),
+      measurementId: this.getString('FIREBASE_MESAUREMENT_ID'),
+    };
+  }
+
   get appConfig() {
     return {
       port: this.getString('PORT'),
     };
+  }
+
+  private getNumber(key: string): number {
+    const value = this.get(key);
+
+    try {
+      return Number(value);
+    } catch {
+      throw new Error(key + ' environment variable is not a number');
+    }
+  }
+
+  private getBoolean(key: string): boolean {
+    const value = this.get(key);
+
+    try {
+      return Boolean(JSON.parse(value));
+    } catch {
+      throw new Error(key + ' env var is not a boolean');
+    }
+  }
+
+  private getString(key: string): string {
+    const value = this.get(key);
+
+    return value.replace(/\\n/g, '\n');
   }
 
   private get(key: string): string {

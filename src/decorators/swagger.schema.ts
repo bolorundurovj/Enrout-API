@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/ban-types,@typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/ban-types,@typescript-eslint/no-unsafe-argument,@typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import type { Type } from '@nestjs/common';
 import { applyDecorators, UseInterceptors } from '@nestjs/common';

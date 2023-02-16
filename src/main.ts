@@ -9,6 +9,7 @@ import { Transport } from '@nestjs/microservices';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import compression from 'compression';
+import basicAuth from 'express-basic-auth';
 import { middleware as expressCtx } from 'express-ctx';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
@@ -90,6 +91,18 @@ export async function bootstrap(): Promise<NestExpressApplication> {
   }
 
   if (configService.documentationEnabled) {
+    if (configService.isProduction) {
+      app.use(
+        ['/documentation', '/docs', '/docs-json'],
+        basicAuth({
+          challenge: true,
+          users: {
+            joshua: 'secret1234',
+          },
+        }),
+      );
+    }
+
     setupSwagger(app);
   }
 
@@ -100,7 +113,7 @@ export async function bootstrap(): Promise<NestExpressApplication> {
     app.enableShutdownHooks();
   }
 
-  const port = configService.appConfig.port;
+  const port = process.env.PORT || configService.appConfig.port || 3000;
   await app.listen(port);
 
   console.info(`server running on ${await app.getUrl()}`);

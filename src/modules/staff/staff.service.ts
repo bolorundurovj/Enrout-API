@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { StorageService } from '@nhogs/nestjs-firebase';
 import type { FindOptionsWhere } from 'typeorm';
 import { Repository } from 'typeorm';
 import { Transactional } from 'typeorm-transactional-cls-hooked';
@@ -23,6 +24,7 @@ export class StaffService {
     private staffRepository: Repository<StaffEntity>,
     private awsS3Service: AwsS3Service,
     private validatorService: ValidatorService,
+    private storageService: StorageService,
   ) {}
 
   @Transactional()
@@ -43,7 +45,10 @@ export class StaffService {
     }
 
     if (file) {
-      staff.avatar = await this.awsS3Service.uploadImage(file);
+      const fileName = `${createStaffDto.firstName}_${createStaffDto.lastName}_${file.originalname}`;
+      await this.storageService.uploadBytes(fileName, file.buffer);
+
+      staff.avatar = await this.storageService.getDownloadURL(fileName);
     }
 
     await this.staffRepository.save(staff);
@@ -193,5 +198,15 @@ export class StaffService {
     );
 
     return userEntity.raw;
+  }
+
+  /**
+   * It returns the number of staff members in the database
+   * @returns The number of staff members in the database.
+   */
+  async getCount(): Promise<number> {
+    const queryBuilder = this.staffRepository.createQueryBuilder('staff');
+
+    return queryBuilder.getCount();
   }
 }

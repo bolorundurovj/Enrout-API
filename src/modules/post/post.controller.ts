@@ -69,6 +69,7 @@ export class PostController {
   }
 
   @Put(':id')
+  @Auth([RoleType.USER])
   @HttpCode(HttpStatus.ACCEPTED)
   @ApiAcceptedResponse()
   updatePost(
@@ -79,6 +80,7 @@ export class PostController {
   }
 
   @Delete(':id')
+  @Auth([RoleType.USER])
   @HttpCode(HttpStatus.ACCEPTED)
   @ApiAcceptedResponse()
   async deletePost(@UUIDParam('id') id: Uuid): Promise<void> {

@@ -4,6 +4,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { FirebaseModule } from '@nhogs/nestjs-firebase';
 import { I18nModule } from 'nestjs-i18n';
 import path from 'path';
 
@@ -11,6 +12,7 @@ import appConfig from './config/app.config';
 import mailConfig from './config/mail.config';
 import { MailModule } from './mail/mail.module';
 import { MailConfigService } from './mail/mail-config.service';
+import { AdminModule } from './modules/admin/admin.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { DepartmentModule } from './modules/department/department.module';
 import { DocumentModule } from './modules/document/document.module';
@@ -27,13 +29,16 @@ import { SharedModule } from './shared/shared.module';
 
 @Module({
   imports: [
-    AuthModule,
-    UserModule,
-    PostModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
       load: [appConfig, mailConfig],
+    }),
+    FirebaseModule.forRoot({
+      apiKey: process.env.FIREBASE_KEY,
+      authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+      projectId: process.env.FIREBASE_PROJECT_ID!,
+      storageBucket: process.env.FIREBASE_BUCKET,
     }),
     TypeOrmModule.forRootAsync({
       imports: [SharedModule],
@@ -64,6 +69,10 @@ import { SharedModule } from './shared/shared.module';
     StaffModule,
     GroupRoleModule,
     DocumentModule,
+    AdminModule,
+    AuthModule,
+    UserModule,
+    PostModule,
   ],
   providers: [],
 })

@@ -11,7 +11,8 @@ import { ApiTags } from '@nestjs/swagger';
 
 import type { PageDto } from '../../common/dto/page.dto';
 import { PageOptionsDto } from '../../common/dto/page-options.dto';
-import { UUIDParam } from '../../decorators';
+import { RoleType } from '../../constants';
+import { Auth, UUIDParam } from '../../decorators';
 import { CreateWorkflowDto } from './dto/create-workflow.dto';
 import { CreateWorkflowItemDto } from './dto/create-workflow-item.dto';
 import { UpdateWorkflowDto } from './dto/update-workflow.dto';
@@ -25,6 +26,7 @@ export class WorkflowController {
   constructor(private readonly workflowService: WorkflowService) {}
 
   @Post()
+  @Auth([RoleType.ADMIN])
   async create(@Body() createWorkflowDto: CreateWorkflowDto) {
     const workflowEntity = await this.workflowService.create(createWorkflowDto);
 
@@ -32,6 +34,7 @@ export class WorkflowController {
   }
 
   @Post(':id/items')
+  @Auth([RoleType.ADMIN])
   async createWorkflowItem(
     @UUIDParam('id') id: Uuid,
     @Body() createWorkflowItemDto: CreateWorkflowItemDto,
@@ -45,6 +48,7 @@ export class WorkflowController {
   }
 
   @Get()
+  @Auth()
   async findAll(
     @Query() pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<WorkflowDto>> {
@@ -52,11 +56,13 @@ export class WorkflowController {
   }
 
   @Get(':id')
+  @Auth()
   async findOne(@UUIDParam('id') id: Uuid): Promise<WorkflowDto> {
     return this.workflowService.findOne(id);
   }
 
   @Patch(':id')
+  @Auth([RoleType.ADMIN])
   async update(
     @UUIDParam('id') id: Uuid,
     @Body() updateWorkflowDto: UpdateWorkflowDto,
@@ -70,6 +76,7 @@ export class WorkflowController {
   }
 
   @Delete(':id')
+  @Auth([RoleType.ADMIN])
   async remove(@UUIDParam('id') id: Uuid): Promise<WorkflowDto> {
     const workflowEntity = await this.workflowService.remove(id);
 
@@ -77,6 +84,7 @@ export class WorkflowController {
   }
 
   @Delete(':id/items')
+  @Auth([RoleType.ADMIN])
   async removeItem(@UUIDParam('id') id: Uuid): Promise<WorkflowItemDto> {
     const workflowItemEntity = await this.workflowService.removeWorkflowItem(
       id,

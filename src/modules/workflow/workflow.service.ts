@@ -154,4 +154,14 @@ export class WorkflowService {
 
     return workflowItemEntity;
   }
+
+  /**
+   * It returns the number of workflows in the database
+   * @returns The number of workflows in the database.
+   */
+  async getCount(): Promise<number> {
+    const queryBuilder = this.workflowRepository.createQueryBuilder('workflow');
+
+    return queryBuilder.getCount();
+  }
 }

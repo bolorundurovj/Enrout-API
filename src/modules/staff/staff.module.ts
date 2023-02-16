@@ -11,7 +11,7 @@ import { StaffService } from './staff.service';
 @Module({
   imports: [
     TypeOrmModule.forFeature([StaffEntity]),
-    DocumentModule,
+    forwardRef(() => DocumentModule),
     MailModule,
     forwardRef(() => StudentModule),
   ],

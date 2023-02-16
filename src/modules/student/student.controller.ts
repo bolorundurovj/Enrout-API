@@ -7,23 +7,25 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
 import type { PageDto } from '../../common/dto/page.dto';
 import { PageOptionsDto } from '../../common/dto/page-options.dto';
 import { RoleType } from '../../constants';
 import { Auth, AuthUser, UUIDParam } from '../../decorators';
 import { MailService } from '../../mail/mail.service';
+import { NotificationService } from '../../shared/services/notification.service';
 import { DocumentService } from '../document/document.service';
 import { CreateDocumentDto } from '../document/dto/create-document.dto';
 import type { DocumentDto } from '../document/dto/document.dto';
 import { StudentUpdateDocumentDto } from '../document/dto/student-update-document.dto';
+import { StatisticsDto } from '../staff/dto/statistics.dto';
 import type { StaffEntity } from '../staff/entities/staff.entity';
 import { StaffService } from '../staff/staff.service';
 import { CreateStudentDto } from './dto/create-student.dto';
 import type { StudentDto } from './dto/student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
-import type { StudentEntity } from './entities/student.entity';
+import { StudentEntity } from './entities/student.entity';
 import { StudentService } from './student.service';
 
 @Controller('students')
@@ -34,9 +36,11 @@ export class StudentController {
     private readonly documentService: DocumentService,
     private readonly mailService: MailService,
     private readonly staffService: StaffService,
+    private notificationService: NotificationService,
   ) {}
 
   @Post()
+  @Auth([RoleType.ADMIN])
   async create(@Body() createStudentDto: CreateStudentDto) {
     const studentEntity = await this.studentService.create(createStudentDto);
 
@@ -44,6 +48,7 @@ export class StudentController {
   }
 
   @Get()
+  @Auth([RoleType.ADMIN])
   async findAll(
     @Query() pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<StudentDto>> {
@@ -59,7 +64,17 @@ export class StudentController {
     return this.documentService.findAllStudentDocs(user.id, pageOptionsDto);
   }
 
+  @Get('/dashboard-stats')
+  @ApiOkResponse({ type: StatisticsDto, description: 'Student Statistics' })
+  @Auth([RoleType.STUDENT])
+  async getDashboardStats(
+    @AuthUser() user: StudentEntity,
+  ): Promise<StatisticsDto> {
+    return this.documentService.getStudentStatistics(user.id);
+  }
+
   @Get(':id')
+  @Auth([RoleType.ADMIN])
   async findOne(@UUIDParam('id') id: Uuid): Promise<StudentDto> {
     const studentEntity = await this.studentService.findById(id);
 
@@ -67,6 +82,7 @@ export class StudentController {
   }
 
   @Patch(':id')
+  @Auth([RoleType.ADMIN])
   async update(
     @UUIDParam('id') id: Uuid,
     @Body() updateStudentDto: UpdateStudentDto,
@@ -80,6 +96,7 @@ export class StudentController {
   }
 
   @Delete(':id')
+  @Auth([RoleType.ADMIN])
   async remove(@UUIDParam('id') id: Uuid): Promise<StudentDto> {
     const studentEntity = await this.studentService.remove(id);
 
@@ -95,6 +112,12 @@ export class StudentController {
     const docEntity = await this.documentService.create(
       user.id,
       createDocumentDto,
+    );
+
+    await this.notificationService.createNotification(
+      `New Document`,
+      `Created Document ${docEntity.title}`,
+      user.id,
     );
 
     return docEntity.toDto();
@@ -124,6 +147,12 @@ export class StudentController {
       updateDocumentDto,
     );
 
+    await this.notificationService.createNotification(
+      `Updated Document`,
+      `Update Document with ID: ${docEntity.id}`,
+      user.id,
+    );
+
     return docEntity.toDto();
   }
 
@@ -136,6 +165,12 @@ export class StudentController {
     const docEntity = await this.documentService.studentDeleteDocument(
       user.id,
       id,
+    );
+
+    await this.notificationService.createNotification(
+      `Deleted Document`,
+      `Deleted Document ${docEntity.title}`,
+      user.id,
     );
 
     return docEntity.toDto();
@@ -155,6 +190,18 @@ export class StudentController {
 
     const staffEntity = await this.staffService.findById(
       docEntity.currentlyAssignedId,
+    );
+
+    await this.notificationService.createNotification(
+      `Published Document`,
+      `Published Document ${docEntity.title} to ${staffEntity.firstName} ${staffEntity.lastName} (${staffEntity.designation})`,
+      user.id,
+    );
+
+    await this.notificationService.createNotification(
+      `Document Submission`,
+      `${user.firstName} ${user.lastName} has submitted Document: ${docEntity.title} for your review`,
+      staffEntity.id,
     );
 
     await this.mailService.forwardedDocument({
@@ -178,6 +225,18 @@ export class StudentController {
 
     const staffEntity = await this.staffService.findById(
       docEntity.currentlyAssignedId,
+    );
+
+    await this.notificationService.createNotification(
+      `Nudge Staff`,
+      `Sent a reminder on ${docEntity.title} to ${staffEntity.firstName} ${staffEntity.lastName} (${staffEntity.designation})`,
+      user.id,
+    );
+
+    await this.notificationService.createNotification(
+      `Document Reminder`,
+      `${user.firstName} ${user.lastName} sent a reminder to review ${docEntity.title}`,
+      staffEntity.id,
     );
 
     await this.mailService.sendNudge({
@@ -206,6 +265,18 @@ export class StudentController {
 
     const staffEntity = await this.staffService.findById(
       docEntity.currentlyAssignedId,
+    );
+
+    await this.notificationService.createNotification(
+      `Returned Document`,
+      `Returned Document ${docEntity.title} to ${staffEntity.firstName} ${staffEntity.lastName} (${staffEntity.designation})`,
+      user.id,
+    );
+
+    await this.notificationService.createNotification(
+      `Returned Document`,
+      `Returned Document ${docEntity.title} from ${user.firstName} ${user.lastName}`,
+      staffEntity.id,
     );
 
     await this.mailService.returnedDocMail({

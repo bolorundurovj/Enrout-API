@@ -26,7 +26,7 @@ export class DocumentController {
   constructor(private readonly documentService: DocumentService) {}
 
   @Post()
-  @Auth([RoleType.STAFF, RoleType.STUDENT])
+  @Auth([RoleType.ADMIN])
   async create(
     @Body() createDocumentDto: CreateDocumentDto,
     @AuthUser() user: StudentEntity | StaffEntity,
@@ -40,6 +40,7 @@ export class DocumentController {
   }
 
   @Get()
+  @Auth([RoleType.ADMIN])
   async findAll(
     @Query() pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<DocumentDto>> {
@@ -47,6 +48,7 @@ export class DocumentController {
   }
 
   @Get(':id')
+  @Auth([RoleType.ADMIN])
   async findOne(@UUIDParam('id') id: Uuid): Promise<DocumentDto> {
     const docEntity = await this.documentService.findOne(id);
 
@@ -54,6 +56,7 @@ export class DocumentController {
   }
 
   @Patch(':id')
+  @Auth([RoleType.ADMIN])
   async update(
     @UUIDParam('id') id: Uuid,
     @Body() updateDocumentDto: UpdateDocumentDto,
@@ -64,6 +67,7 @@ export class DocumentController {
   }
 
   @Delete(':id')
+  @Auth([RoleType.ADMIN])
   async remove(@UUIDParam('id') id: Uuid): Promise<DocumentDto> {
     const docEntity = await this.documentService.remove(id);
 

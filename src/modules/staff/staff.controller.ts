@@ -8,7 +8,7 @@ import {
   Query,
   UploadedFile,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
 import type { PageDto } from '../../common/dto/page.dto';
 import { PageOptionsDto } from '../../common/dto/page-options.dto';
@@ -16,6 +16,7 @@ import { DocumentState, RoleType } from '../../constants';
 import { ApiFile, Auth, AuthUser, UUIDParam } from '../../decorators';
 import { IFile } from '../../interfaces';
 import { MailService } from '../../mail/mail.service';
+import { NotificationService } from '../../shared/services/notification.service';
 import { IUnifiedUser } from '../auth/jwt.strategy';
 import { DocumentService } from '../document/document.service';
 import type { DocumentDto } from '../document/dto/document.dto';
@@ -28,8 +29,9 @@ import { StudentService } from '../student/student.service';
 import { CreateStaffDto } from './dto/create-staff.dto';
 import { ForwardDocumentDto } from './dto/forward-document.dto';
 import type { StaffDto } from './dto/staff.dto';
+import { StatisticsDto } from './dto/statistics.dto';
 import { UpdateStaffDto } from './dto/update-staff.dto';
-import type { StaffEntity } from './entities/staff.entity';
+import { StaffEntity } from './entities/staff.entity';
 import { StaffService } from './staff.service';
 
 @Controller('staff')
@@ -40,9 +42,11 @@ export class StaffController {
     private readonly documentService: DocumentService,
     private readonly mailService: MailService,
     private readonly studentService: StudentService,
+    private readonly notificationService: NotificationService,
   ) {}
 
   @Post()
+  @Auth([RoleType.ADMIN])
   async create(@Body() createStaffDto: CreateStaffDto) {
     const staffEntity = await this.staffService.create(createStaffDto);
 
@@ -50,6 +54,7 @@ export class StaffController {
   }
 
   @Get()
+  @Auth([RoleType.ADMIN])
   async findAll(
     @Query() pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<StaffDto>> {
@@ -65,7 +70,17 @@ export class StaffController {
     return this.documentService.findStaffAssignedDocs(user.id, pageOptionsDto);
   }
 
+  @Get('/dashboard-stats')
+  @ApiOkResponse({ type: StatisticsDto, description: 'Staff Statistics' })
+  @Auth([RoleType.STAFF])
+  async getDashboardStats(
+    @AuthUser() user: StaffEntity,
+  ): Promise<StatisticsDto> {
+    return this.documentService.getStaffStatistics(user.id);
+  }
+
   @Get(':id')
+  @Auth([RoleType.ADMIN])
   async findOne(@UUIDParam('id') id: Uuid): Promise<StaffDto> {
     const staffEntity = await this.staffService.findById(id);
 
@@ -73,6 +88,7 @@ export class StaffController {
   }
 
   @Patch(':id')
+  @Auth([RoleType.ADMIN])
   async update(
     @UUIDParam('id') id: Uuid,
     @Body() updateStaffDto: UpdateStaffDto,
@@ -83,6 +99,7 @@ export class StaffController {
   }
 
   @Delete(':id')
+  @Auth([RoleType.ADMIN])
   async remove(@UUIDParam('id') id: Uuid): Promise<StaffDto> {
     const staffEntity = await this.staffService.remove(id);
 
@@ -101,6 +118,7 @@ export class StaffController {
   }
 
   @Patch('documents/:id')
+  @Auth([RoleType.STAFF])
   async updateDOc(
     @UUIDParam('id') id: Uuid,
     @Body() updateDocumentDto: UpdateDocumentDto,
@@ -110,6 +128,12 @@ export class StaffController {
       user.id,
       id,
       updateDocumentDto,
+    );
+
+    await this.notificationService.createNotification(
+      `Updated Document`,
+      `Update Document with ID: ${docEntity.id}`,
+      user.id,
     );
 
     return docEntity.toDto();
@@ -133,9 +157,21 @@ export class StaffController {
       file,
     );
 
+    await this.notificationService.createNotification(
+      `Approved Document`,
+      `Approved Document with ID: ${docEntity.id}`,
+      user.id,
+    );
+
     if (docEntity.state === DocumentState.APPROVED) {
       const studentEntity = await this.studentService.findById(
         docEntity.ownerId,
+      );
+
+      await this.notificationService.createNotification(
+        `Approved Document`,
+        `Document ${docEntity.title} with ID: ${docEntity.id} has been approved`,
+        studentEntity.id,
       );
 
       await this.mailService.documentApproved({
@@ -148,6 +184,12 @@ export class StaffController {
     } else {
       const staffEntity = await this.staffService.findById(
         docEntity.currentlyAssignedId,
+      );
+
+      await this.notificationService.createNotification(
+        `Forwarded Document`,
+        `Document with ID: ${docEntity.id} requires your attention`,
+        staffEntity.id,
       );
 
       await this.mailService.forwardedDocument({
@@ -177,6 +219,18 @@ export class StaffController {
 
     const studentEntity = await this.studentService.findById(docEntity.ownerId);
 
+    await this.notificationService.createNotification(
+      `Rejected Document`,
+      `Rejected Document with ID: ${docEntity.id}`,
+      user.id,
+    );
+
+    await this.notificationService.createNotification(
+      `Rejected Document`,
+      `Your document ${docEntity.title} with ID: ${docEntity.id} has been rejected`,
+      studentEntity.id,
+    );
+
     await this.mailService.docRejectedMail({
       to: studentEntity.email,
       data: {
@@ -202,6 +256,18 @@ export class StaffController {
 
     const studentEntity = await this.studentService.findById(docEntity.ownerId);
 
+    await this.notificationService.createNotification(
+      `Changes Requested`,
+      `Changes Requested on Document with ID: ${docEntity.id}`,
+      user.id,
+    );
+
+    await this.notificationService.createNotification(
+      `Changes Requested`,
+      `Your document ${docEntity.title} with ID: ${docEntity.id} needs some changes`,
+      studentEntity.id,
+    );
+
     await this.mailService.changeRequestedMail({
       to: studentEntity.email,
       data: {
@@ -223,6 +289,12 @@ export class StaffController {
       user.id,
       id,
       body.workflowId,
+    );
+
+    await this.notificationService.createNotification(
+      `Document Workflow`,
+      `Set Workflow for Document with ID: ${docEntity.id}. Workflow ID: ${body.workflowId}`,
+      user.id,
     );
 
     return docEntity.toDto();

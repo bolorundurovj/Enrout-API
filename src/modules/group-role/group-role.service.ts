@@ -82,4 +82,14 @@ export class GroupRoleService {
 
     return groupEntity;
   }
+
+  /**
+   * It returns the number of rows in the group_role table
+   * @returns The number of roles in the database.
+   */
+  async getCount(): Promise<number> {
+    const queryBuilder = this.roleRepository.createQueryBuilder('group_role');
+
+    return queryBuilder.getCount();
+  }
 }

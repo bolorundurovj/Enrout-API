@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
 import type { IAbstractEntity } from '../../../common/abstract.entity';
 import { AbstractEntity } from '../../../common/abstract.entity';
@@ -64,7 +64,7 @@ export class DocumentEntity extends AbstractEntity<DocumentDto> {
   @Column({ default: false })
   isDeleted: boolean;
 
-  @OneToOne(() => WorkflowEntity)
+  @ManyToOne(() => WorkflowEntity)
   @JoinColumn()
   workflow: WorkflowEntity;
 
