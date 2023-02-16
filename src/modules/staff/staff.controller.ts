@@ -31,7 +31,7 @@ import { ForwardDocumentDto } from './dto/forward-document.dto';
 import type { StaffDto } from './dto/staff.dto';
 import { StatisticsDto } from './dto/statistics.dto';
 import { UpdateStaffDto } from './dto/update-staff.dto';
-import type { StaffEntity } from './entities/staff.entity';
+import { StaffEntity } from './entities/staff.entity';
 import { StaffService } from './staff.service';
 
 @Controller('staff')
@@ -74,7 +74,7 @@ export class StaffController {
   @ApiOkResponse({ type: StatisticsDto, description: 'Staff Statistics' })
   @Auth([RoleType.STAFF])
   async getDashboardStats(
-    @AuthUser() user: StudentEntity,
+    @AuthUser() user: StaffEntity,
   ): Promise<StatisticsDto> {
     return this.documentService.getStaffStatistics(user.id);
   }

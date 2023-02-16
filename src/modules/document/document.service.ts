@@ -20,6 +20,14 @@ import type { DocumentDto } from './dto/document.dto';
 import type { UpdateDocumentDto } from './dto/update-document.dto';
 import { DocumentEntity } from './entities/document.entity';
 
+const uniqueStatuses = [
+  DocumentState.PENDING,
+  DocumentState.APPROVED,
+  DocumentState.REJECTED,
+  DocumentState.CHANGE_REQUESTED,
+  DocumentState.DRAFT,
+];
+
 @Injectable()
 export class DocumentService {
   constructor(
@@ -651,7 +659,7 @@ export class DocumentService {
    * @returns An object with the total number of documents, the number of students, and the number of documents in each
    * category.
    */
-  async getStaffStatistics(staffId: Uuid) {
+  async getStaffStatistics(staffId: Uuid): Promise<StatisticsDto> {
     const startOfDay = new Date();
     startOfDay.setDate(startOfDay.getDate() - 7);
     startOfDay.setHours(0, 0, 0, 0);
@@ -685,14 +693,6 @@ export class DocumentService {
       .orderBy('day, state')
       .getRawMany();
 
-    const uniqueStatuses = [
-      DocumentState.PENDING,
-      DocumentState.APPROVED,
-      DocumentState.REJECTED,
-      DocumentState.CHANGE_REQUESTED,
-      DocumentState.DRAFT,
-    ];
-
     const processedData = uniqueStatuses.map((state) => {
       const itemsByStatus = queryResult.filter((row) => row.state === state);
       // eslint-disable-next-line unicorn/no-array-reduce
@@ -712,6 +712,65 @@ export class DocumentService {
     stats.submissions = total;
     stats.submissionsByCategory = categories;
     stats.students = Number(studentCount.count);
+    stats.weeklySubmissions = processedData;
+
+    return stats;
+  }
+
+  /**
+   * It returns a statistics object for a given student
+   * @param {Uuid} studentId - Uuid - The student's ID
+   * @returns A StatisticsDto object
+   */
+  async getStudentStatistics(studentId: Uuid): Promise<StatisticsDto> {
+    const queryBuilder = this.docRepository
+      .createQueryBuilder('doc')
+      .where('doc.ownerId = :id', { id: studentId });
+
+    const total = await queryBuilder.getCount();
+    const staffCount = await queryBuilder
+      .select('COUNT(DISTINCT(currently_assigned_id))', 'count')
+      .getRawOne();
+    const categories = await this.docRepository
+      .createQueryBuilder('doc')
+      .where('doc.ownerId = :id', { id: studentId })
+      .groupBy('doc.state')
+      .orderBy('doc.state')
+      .select('COUNT(doc.id)', 'count')
+      .addSelect('doc.state', 'state')
+      .getRawMany();
+
+    const start = moment().subtract(6, 'days').startOf('day');
+    const end = moment().endOf('day');
+
+    const queryResult = await this.docRepository
+      .createQueryBuilder('doc')
+      .where('doc.ownderId = :id', { id: studentId })
+      .select("state, DATE_TRUNC('day', created_at) as day, COUNT(id) as count")
+      .where('created_at BETWEEN :start AND :end', { start, end })
+      .groupBy('state, day')
+      .orderBy('day, state')
+      .getRawMany();
+
+    const processedData = uniqueStatuses.map((state) => {
+      const itemsByStatus = queryResult.filter((row) => row.state === state);
+      // eslint-disable-next-line unicorn/no-array-reduce
+      const countByDay = itemsByStatus.reduce((acc, row) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        const day = moment(row.day).diff(start, 'days');
+        acc[day] = Number(row.count);
+
+        return acc;
+      }, Array.from({ length: 7 }).fill(0));
+
+      return { name: state, data: countByDay };
+    });
+
+    const stats = new StatisticsDto();
+
+    stats.submissions = total;
+    stats.submissionsByCategory = categories;
+    stats.students = Number(staffCount.count);
     stats.weeklySubmissions = processedData;
 
     return stats;

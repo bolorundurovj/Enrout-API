@@ -7,7 +7,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
 import type { PageDto } from '../../common/dto/page.dto';
 import { PageOptionsDto } from '../../common/dto/page-options.dto';
@@ -19,12 +19,13 @@ import { DocumentService } from '../document/document.service';
 import { CreateDocumentDto } from '../document/dto/create-document.dto';
 import type { DocumentDto } from '../document/dto/document.dto';
 import { StudentUpdateDocumentDto } from '../document/dto/student-update-document.dto';
+import { StatisticsDto } from '../staff/dto/statistics.dto';
 import type { StaffEntity } from '../staff/entities/staff.entity';
 import { StaffService } from '../staff/staff.service';
 import { CreateStudentDto } from './dto/create-student.dto';
 import type { StudentDto } from './dto/student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
-import type { StudentEntity } from './entities/student.entity';
+import { StudentEntity } from './entities/student.entity';
 import { StudentService } from './student.service';
 
 @Controller('students')
@@ -61,6 +62,15 @@ export class StudentController {
     @AuthUser() user: StudentEntity | StaffEntity,
   ): Promise<PageDto<DocumentDto>> {
     return this.documentService.findAllStudentDocs(user.id, pageOptionsDto);
+  }
+
+  @Get('/dashboard-stats')
+  @ApiOkResponse({ type: StatisticsDto, description: 'Student Statistics' })
+  @Auth([RoleType.STUDENT])
+  async getDashboardStats(
+    @AuthUser() user: StudentEntity,
+  ): Promise<StatisticsDto> {
+    return this.documentService.getStudentStatistics(user.id);
   }
 
   @Get(':id')
