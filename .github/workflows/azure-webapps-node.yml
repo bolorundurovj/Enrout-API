@@ -45,7 +45,7 @@ jobs:
     - name: yarn install, build, and test
       run: |
         yarn install
-        yarn run build:prod --if-present
+        yarn run build:prod
     - name: Upload artifact for deployment job
       uses: actions/upload-artifact@v3
       with:
