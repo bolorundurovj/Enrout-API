@@ -181,12 +181,16 @@ export class DocumentService {
   /**
    * It rejects a document by updating its state to REJECTED and adding a reviewer comment
    * @param {Uuid} userId - Uuid - The user id of the user who is rejecting the document
+   * @param deptId
+   * @param designation
    * @param {Uuid} docId - The id of the document to be rejected.
    * @param {string} comment - string - the comment that the reviewer will add to the document
    * @returns DocumentEntity
    */
   async rejectDocument(
     userId: Uuid,
+    deptId: Uuid,
+    designation: StaffDesignation,
     docId: Uuid,
     comment: string,
   ): Promise<DocumentEntity> {
@@ -201,10 +205,50 @@ export class DocumentService {
       throw new NotFoundException();
     }
 
-    await this.docRepository.update(
-      { id: docId },
-      { state: DocumentState.REJECTED, reviewerComment: comment },
+    const workflow = await this.workflowService.findOne(docEntity.workflowId);
+
+    const currentIdx = workflow.workflowItems.findIndex(
+      (x) => x.groupRole.designation === designation,
     );
+
+    if (currentIdx > 0) {
+      const staffEntity = await ([
+        StaffDesignation.HOD,
+        StaffDesignation.Dean,
+      ].includes(workflow.workflowItems[currentIdx - 1].groupRole.designation)
+        ? this.staffService.findOneByDeptAndRole(
+            deptId,
+            workflow.workflowItems[currentIdx - 1].groupRole.designation,
+          )
+        : this.staffService.findOne({
+            designation:
+              workflow.workflowItems[currentIdx - 1].groupRole.designation,
+          }));
+
+      if (!staffEntity) {
+        throw new NotFoundException('Staff not found');
+      }
+
+      docEntity.currentlyAssignedId = staffEntity.id;
+
+      await this.docRepository.update(
+        { id: docId },
+        {
+          currentlyAssignedId: staffEntity.id,
+          reviewerComment: comment,
+          reviewerAttachment: docEntity.reviewerAttachment,
+        },
+      );
+    } else {
+      await this.docRepository.update(
+        { id: docId },
+        {
+          reviewerComment: comment,
+          state: DocumentState.REJECTED,
+        },
+      );
+      docEntity.state = DocumentState.REJECTED;
+    }
 
     return docEntity;
   }

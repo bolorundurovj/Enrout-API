@@ -100,10 +100,12 @@ export class MailService {
   }
 
   /**
-   * It sends an email to the user with the email address in the `to` field of the `mailData` object
-   * @param mailData - IMailData<{ docTitle: string }>
+   * It sends an email to the user with the title of the document and the reason for rejection
+   * @param mailData - IMailData<{ docTitle: string; reason: string }>
    */
-  async docRejectedMail(mailData: IMailData<{ docTitle: string }>) {
+  async docRejectedMail(
+    mailData: IMailData<{ docTitle: string; reason: string }>,
+  ) {
     await this.mailerService.sendMail({
       to: mailData.to,
       subject: 'Submission Rejected',
@@ -113,6 +115,7 @@ export class MailService {
         actionTitle: 'View Now',
         app_name: this.configService.get('app.name'),
         text1: `${mailData.data.docTitle}`,
+        text2: `${mailData.data.reason}`,
       },
     });
   }

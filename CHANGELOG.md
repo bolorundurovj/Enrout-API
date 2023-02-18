@@ -1,5 +1,12 @@
 
 
+# [2.4.0](https://github.com/bolorundurovj/Enrout/compare/2.3.0...2.4.0) (2023-02-18)
+
+
+### Features
+
+* **staff:** Refactor Document Rejection ([ba8225c](https://github.com/bolorundurovj/Enrout/commit/ba8225c4b3f5acfdb28fe4dd793a85b45da1222b))
+
 # [2.3.0](https://github.com/bolorundurovj/Enrout/compare/2.2.0...2.3.0) (2023-02-16)
 
 

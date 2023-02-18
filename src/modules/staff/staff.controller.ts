@@ -213,11 +213,13 @@ export class StaffController {
   ): Promise<DocumentDto> {
     const docEntity = await this.documentService.rejectDocument(
       user.id,
+      user.departmentId! as Uuid,
+      user.designation!,
       id,
       body.comment,
     );
 
-    const studentEntity = await this.studentService.findById(docEntity.ownerId);
+    docEntity.reviewerComment = body.comment;
 
     await this.notificationService.createNotification(
       `Rejected Document`,
@@ -225,18 +227,43 @@ export class StaffController {
       user.id,
     );
 
-    await this.notificationService.createNotification(
-      `Rejected Document`,
-      `Your document ${docEntity.title} with ID: ${docEntity.id} has been rejected`,
-      studentEntity.id,
-    );
+    if (docEntity.state === DocumentState.REJECTED) {
+      const studentEntity = await this.studentService.findById(
+        docEntity.ownerId,
+      );
 
-    await this.mailService.docRejectedMail({
-      to: studentEntity.email,
-      data: {
-        docTitle: docEntity.title,
-      },
-    });
+      await this.notificationService.createNotification(
+        `Rejected Document`,
+        `Your document ${docEntity.title} with ID: ${docEntity.id} has been rejected`,
+        studentEntity.id,
+      );
+
+      await this.mailService.docRejectedMail({
+        to: studentEntity.email,
+        data: {
+          docTitle: docEntity.title,
+          reason: docEntity.reviewerComment,
+        },
+      });
+    } else {
+      const staffEntity = await this.staffService.findById(
+        docEntity.currentlyAssignedId,
+      );
+
+      await this.notificationService.createNotification(
+        `Rejected Document`,
+        `Document with ID: ${docEntity.id} requires your attention`,
+        staffEntity.id,
+      );
+
+      await this.mailService.docRejectedMail({
+        to: staffEntity.email,
+        data: {
+          docTitle: docEntity.title,
+          reason: docEntity.reviewerComment,
+        },
+      });
+    }
 
     return docEntity.toDto();
   }
