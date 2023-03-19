@@ -526,7 +526,7 @@ export class DocumentService {
     const queryBuilder = this.docRepository
       .createQueryBuilder('doc')
       .where('doc.ownerId = :id', { id: studentId })
-      .andWhere('doc.id = :id', { id: docId });
+      .andWhere('doc.id = :did', { did: docId });
 
     const docEntity = await queryBuilder.getOne();
 
