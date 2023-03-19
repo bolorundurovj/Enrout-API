@@ -1,5 +1,19 @@
 
 
+## [2.5.1](https://github.com/bolorundurovj/Enrout/compare/2.5.0...2.5.1) (2023-03-19)
+
+
+### Bug Fixes
+
+* Not Found error when student tries to update document ([d7eb6fe](https://github.com/bolorundurovj/Enrout/commit/d7eb6fe2af31d9c4463f1d87e47ce2cbc9cd4d12))
+
+
+### Features
+
+* Add Docsify & Remove Vuepress ([5b1b3dc](https://github.com/bolorundurovj/Enrout/commit/5b1b3dc167df4b00481d6b117427980a8e5b401b))
+* Update App Documentation ([c7e10d4](https://github.com/bolorundurovj/Enrout/commit/c7e10d4413a515a2455d61330bccf2c003d273c9))
+* Update Rejected Document Mail Content ([969c465](https://github.com/bolorundurovj/Enrout/commit/969c4651ec540ef4c02f49437112461f1e901580))
+
 # [2.5.0](https://github.com/bolorundurovj/Enrout/compare/2.4.1...2.5.0) (2023-02-18)
 
 ## [2.4.1](https://github.com/bolorundurovj/Enrout/compare/2.4.0...2.4.1) (2023-02-18)
